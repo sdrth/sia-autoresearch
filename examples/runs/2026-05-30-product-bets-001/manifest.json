@@ -1,0 +1,39 @@
+{
+  "id": "2026-05-30-product-bets-001",
+  "kind": "product-bets",
+  "title": "Onboarding drop-off bets for B2B SaaS",
+  "topic": "What product changes would most reduce trial-to-paid drop-off for a B2B workflow tool?",
+  "verdict": "keep",
+  "hypothesisCounts": {
+    "generated": 6,
+    "researched": 6,
+    "discarded": 3,
+    "kept": 1
+  },
+  "selectedQueries": [
+    "B2B SaaS onboarding drop-off patterns 2025",
+    "trial to paid conversion product changes",
+    "activation metric benchmarks SaaS"
+  ],
+  "selectedSources": [
+    "Lenny's Newsletter — free-to-paid conversion",
+    "Lenny's Newsletter — activation rate",
+    "First Round Review — Superhuman PMF engine",
+    "Intercom — C.A.R.E. onboarding",
+    "ChartMogul — SaaS benchmarks report"
+  ],
+  "scores": {
+    "novelty": 0.65,
+    "actionability": 0.85,
+    "strategicLeverage": 0.80,
+    "evidenceQuality": 0.72,
+    "clarity": 0.78,
+    "overall": 0.76
+  },
+  "publishingFile": null,
+  "outputs": {
+    "reversePressRelease": false
+  },
+  "createdAt": "2026-05-30T09:15:00Z",
+  "updatedAt": "2026-05-30T10:42:00Z"
+}

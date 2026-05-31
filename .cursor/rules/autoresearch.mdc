@@ -1,0 +1,50 @@
+---
+description: sia-autoresearch — founder research system
+globs: ["start/**", "config/**", "runs/**", "notes/**", "dashboard/**", "examples/**", "autoresearch/**"]
+alwaysApply: false
+---
+
+# sia-autoresearch
+
+This repo uses the sia-autoresearch workflow for founders and builders.
+
+When asked to run research, analyze the product, generate bets, explore strategy, do competitive intel, or write founder content:
+
+1. **Detect mode and resolve paths** — see spec section 2
+   - **Standalone lab (this repo):** spec = `start/AUTORESEARCH-START.md`, lab root = repo root, runs at `runs/`
+   - **Embedded mode:** spec = `autoresearch/AUTORESEARCH-START.md`, lab root = `autoresearch/`
+2. **Read and follow** the spec file for the detected mode
+3. **Create and edit only under `<lab>/`** — in this repo, `start/` and `examples/` are read-only reference material
+4. **Do not skip the startup interview** — if `<lab>/config/setup.md` is missing or not `status: complete`, run section 3 first
+5. **Search before synthesis** — generate multiple hypotheses, test multiple query branches, and do not jump to the first plausible answer
+6. **Preserve proof of work** — keep exact queries run, linked sources, discarded branches, and why the kept thesis won
+7. **Viewer is optional** — follow Q10b from setup; use `examples/` as demo reference; no committed dashboard in this repo
+8. **Security** — user's agent and tools only; default web search for external signals; no telemetry or sia-autoresearch API calls (spec section 2A)
+9. **After every run:** post a run summary in chat; update the viewer only if the owner enabled one
+
+## Quick start prompt
+
+```
+Read and follow: start/AUTORESEARCH-START.md
+```
+
+## Per-run chat report (required)
+
+After every run, post this block:
+
+```
+## Run complete: [run-id]
+**Kind:** [kind] | **Score:** [overall] | **Verdict:** [verdict]
+**Topic:** [topic]
+**Proof of work:** [hypotheses generated] generated | [hypotheses discarded] discarded
+**Top findings:**
+1. [finding]
+2. [finding]
+3. [finding]
+**Why this won:** [one sentence]
+**Viewer:** [path if enabled, or "runs/ only"]
+```
+
+Spec + source: https://github.com/sdrth/sia-autoresearch
+
+Inspired by [Karpathy's autoresearch](https://github.com/karpathy/autoresearch).

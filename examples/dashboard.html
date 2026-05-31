@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<!--
+  sia-autoresearch demo viewer — local-only by design.
+
+  - Single self-contained file: inline CSS + JS + embedded run data
+  - No CDN scripts/styles/fonts, no npm packages, no fetch/XHR, no WebSocket
+  - No telemetry, analytics, or background network calls
+  - Source links in Notes render as <a href> only; they load if the user clicks them
+  - Safe to open via file:// — open examples/dashboard.html in a browser
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; font-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; base-uri 'none'; form-action 'none';">
+  <meta name="referrer" content="no-referrer">
+  <title>sia-autoresearch · Runs</title>
+  <style>
+    :root {
+      --bg: #f6f3ee;
+      --surface: rgba(255, 255, 255, 0.76);
+      --surface-strong: rgba(255, 255, 255, 0.92);
+      --text: #161616;
+      --muted: #6d6d73;
+      --muted-light: rgba(109, 109, 115, 0.72);
+      --line: rgba(17, 17, 17, 0.08);
+      --line-strong: rgba(17, 17, 17, 0.14);
+      --accent: #0f6fff;
+      --accent-soft: rgba(15, 111, 255, 0.10);
+      --accent-text: #0a5bcc;
+      --success: #0f8a5f;
+      --success-soft: rgba(15, 138, 95, 0.12);
+      --amber: #c47a12;
+      --amber-soft: rgba(196, 122, 18, 0.12);
+      --purple: #7d5cad;
+      --purple-soft: rgba(125, 92, 173, 0.12);
+      --shadow: 0 24px 80px rgba(17, 17, 17, 0.08);
+      --shadow-sm: 0 8px 28px rgba(17, 17, 17, 0.06);
+      --sidebar-w: 280px;
+      --page: 900px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --font: "SF Pro Display", "SF Pro Text", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: var(--font);
+      color: var(--text);
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      overflow: hidden;
+    }
+
+    html {
+      background: radial-gradient(circle at top, #ffffff 0%, #f7f4ef 26%, #f1ece5 58%, #ece6de 100%);
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 14% 10%, rgba(255, 255, 255, 0.95), transparent 24%),
+        radial-gradient(circle at 84% 0%, rgba(15, 111, 255, 0.08), transparent 20%),
+        radial-gradient(circle at 70% 72%, rgba(15, 138, 95, 0.06), transparent 18%);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: linear-gradient(180deg, var(--surface), rgba(255, 255, 255, 0.55));
+      border-right: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar__head {
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .sidebar__brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .brand__dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, #2a80ff, #7eb2ff);
+      box-shadow: 0 0 0 8px rgba(15, 111, 255, 0.09);
+    }
+
+    .sidebar__title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .sidebar__sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .search {
+      width: 100%;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.56);
+      backdrop-filter: blur(14px);
+      font-size: 0.82rem;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      margin-bottom: 8px;
+    }
+
+    .search:focus {
+      border-color: rgba(15, 111, 255, 0.28);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .search::placeholder { color: var(--muted-light); }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .filter-select {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.56);
+      backdrop-filter: blur(14px);
+      font-size: 0.72rem;
+      font-family: inherit;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .sidebar__count {
+      padding: 10px 14px 6px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+    }
+
+    .run-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 8px 12px;
+    }
+
+    .run-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      border: 1px solid transparent;
+      margin-bottom: 4px;
+      background: transparent;
+      transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
+    }
+
+    .run-row:hover {
+      background: rgba(255, 255, 255, 0.68);
+      border-color: var(--line);
+    }
+
+    .run-row.is-active {
+      background: rgba(255, 255, 255, 0.88);
+      border-color: rgba(15, 111, 255, 0.14);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .run-row__emoji {
+      font-size: 1rem;
+      line-height: 1.2;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .run-row__body { min-width: 0; flex: 1; }
+
+    .run-row__title {
+      font-size: 0.82rem;
+      font-weight: 500;
+      line-height: 1.35;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text);
+    }
+
+    .run-row__meta {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-top: 4px;
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+
+    .run-row__score {
+      font-weight: 600;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sidebar__foot {
+      padding: 10px 14px;
+      border-top: 1px solid var(--line);
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .sidebar__foot a { color: var(--accent-text); text-decoration: none; }
+    .sidebar__foot a:hover { text-decoration: underline; }
+
+    /* Main */
+    .main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .main-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    .run-chrome {
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.62));
+      backdrop-filter: blur(14px);
+    }
+
+    .run-header {
+      max-width: var(--page);
+      margin: 0 auto;
+      padding: 12px 24px 10px;
+    }
+
+    .run-header__row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .run-header__id {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+      flex-shrink: 0;
+      letter-spacing: 0.04em;
+    }
+
+    .run-header__title {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .run-header__meta {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .run-header__sub {
+      display: flex;
+      gap: 12px;
+      align-items: baseline;
+      margin-top: 8px;
+      min-width: 0;
+      font-size: 0.74rem;
+      line-height: 1.4;
+      color: var(--muted);
+    }
+
+    .run-header__thesis {
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--muted);
+    }
+
+    .run-header__proof {
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+      color: var(--muted-light);
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.70);
+      font-size: 0.68rem;
+      font-weight: 500;
+      line-height: 1.4;
+      color: var(--muted);
+    }
+
+    .chip--kind {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: rgba(15, 111, 255, 0.08);
+    }
+
+    .chip--keep {
+      background: var(--success-soft);
+      color: var(--success);
+      border-color: rgba(15, 138, 95, 0.1);
+    }
+
+    .chip--score {
+      background: rgba(17, 17, 17, 0.92);
+      color: #f4f4f6;
+      border-color: transparent;
+    }
+
+    .run-intro {
+      max-width: var(--page);
+      margin: 0 auto 16px;
+    }
+
+    .run-intro__topic {
+      font-size: 0.88rem;
+      line-height: 1.55;
+      color: var(--muted);
+      margin-bottom: 12px;
+      max-width: 62ch;
+    }
+
+    .run-intro__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .run-intro__cell {
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.68);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .run-intro__label {
+      display: block;
+      font-size: 0.62rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .run-intro__text {
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: var(--text);
+    }
+
+    .run-intro__text strong { font-weight: 600; }
+
+    /* Tabs */
+    .tabs-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--line);
+      overflow-x: auto;
+      flex-shrink: 0;
+      background: transparent;
+      padding: 0 24px;
+    }
+
+    .tabs-bar__inner {
+      max-width: var(--page);
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      gap: 4px;
+      padding: 6px 0;
+    }
+
+    .tab {
+      padding: 6px 12px;
+      font-size: 0.76rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: color 0.12s, background 0.12s, border-color 0.12s;
+    }
+
+    .tab:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.56);
+      border-color: var(--line);
+    }
+
+    .tab.is-active {
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-color: rgba(15, 111, 255, 0.12);
+    }
+
+    .tab.is-empty { opacity: 0.45; }
+
+    .tab-panel {
+      max-width: var(--page);
+      margin: 0 auto;
+      padding: 16px 24px 40px;
+    }
+
+    .content-card {
+      padding: 22px 24px;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255, 255, 255, 0.92);
+      background: linear-gradient(180deg, var(--surface), var(--surface-strong));
+      box-shadow: var(--shadow);
+    }
+
+    .prose h1, .prose h2, .prose h3 {
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 1.6em 0 0.5em;
+      line-height: 1.3;
+      color: var(--text);
+    }
+
+    .prose h1 { font-size: 1.5rem; }
+    .prose h2 { font-size: 1.2rem; }
+    .prose h3 { font-size: 1rem; }
+    .prose h1:first-child, .prose h2:first-child, .prose h3:first-child { margin-top: 0; }
+
+    .prose p {
+      font-size: 0.92rem;
+      line-height: 1.65;
+      color: var(--muted);
+      margin-bottom: 0.75em;
+    }
+
+    .prose ul, .prose ol {
+      font-size: 0.92rem;
+      line-height: 1.65;
+      color: var(--muted);
+      margin: 0 0 1em 1.4em;
+    }
+
+    .prose li { margin-bottom: 0.25em; }
+    .prose strong { color: var(--text); font-weight: 600; }
+
+    .prose a {
+      color: var(--accent-text);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .prose hr {
+      border: none;
+      border-top: 1px solid var(--line);
+      margin: 1.5em 0;
+    }
+
+    .prose code {
+      font-family: var(--mono);
+      font-size: 0.85em;
+      background: rgba(17, 17, 17, 0.05);
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--muted);
+    }
+
+    .empty-state__icon { font-size: 1.6rem; margin-bottom: 10px; opacity: 0.55; }
+    .empty-state__title { font-size: 0.92rem; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+    .empty-state__text { font-size: 0.82rem; line-height: 1.5; max-width: 360px; margin: 0 auto; }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .score-cell {
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.68);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .score-cell__label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .score-cell__val {
+      font-size: 1.35rem;
+      font-weight: 650;
+      letter-spacing: -0.04em;
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+
+    .score-cell__bar {
+      height: 5px;
+      background: rgba(17, 17, 17, 0.07);
+      border-radius: 999px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .score-cell__fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #2a80ff, #66a4ff);
+    }
+
+    .no-results {
+      padding: 24px 14px;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .run-header, .tabs-bar { padding-left: 16px; padding-right: 16px; }
+      .tab-panel { padding-left: 16px; padding-right: 16px; }
+      .run-intro__grid { grid-template-columns: 1fr; }
+      .score-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar__head">
+        <div class="sidebar__brand">
+          <span class="brand__dot" aria-hidden="true"></span>
+          <div>
+            <div class="sidebar__title">Research runs</div>
+            <div class="sidebar__sub">sia-autoresearch demo</div>
+          </div>
+        </div>
+        <input class="search" id="search" type="search" placeholder="Search runs…" autocomplete="off">
+        <div class="filters">
+          <select class="filter-select" id="sort" aria-label="Sort runs">
+            <option value="date-desc">Newest first</option>
+            <option value="date-asc">Oldest first</option>
+            <option value="score-desc">Highest score</option>
+            <option value="score-asc">Lowest score</option>
+            <option value="title">Title A–Z</option>
+          </select>
+          <select class="filter-select" id="filter-kind" aria-label="Filter by kind">
+            <option value="">All kinds</option>
+            <option value="product-bets">product-bets</option>
+            <option value="strategy">strategy</option>
+          </select>
+        </div>
+        <select class="filter-select" id="filter-verdict" aria-label="Filter by verdict" style="width:100%;margin-top:6px">
+          <option value="">All verdicts</option>
+          <option value="keep">keep</option>
+          <option value="discard">discard</option>
+        </select>
+      </div>
+      <div class="sidebar__count" id="run-count"></div>
+      <div class="run-list" id="run-list"></div>
+      <div class="sidebar__foot">
+        <strong>Local only</strong> — no network on load. Source URLs in Notes open only if you click them.
+        <br>Demo viewer — your agent builds <code>&lt;lab&gt;/dashboard/</code> at setup.
+        <br><a href="README.md">Examples README</a> (local file)
+      </div>
+    </aside>
+
+    <div class="main">
+      <div class="run-chrome">
+        <div id="page-header"></div>
+        <div class="tabs-bar">
+          <div class="tabs-bar__inner" id="tabs"></div>
+        </div>
+      </div>
+      <div class="main-scroll">
+        <div class="tab-panel">
+          <div id="run-intro"></div>
+          <div class="content-card">
+            <div class="prose" id="tab-content"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script id="runs-json" type="application/json">
+  [
+    {
+      "id": "2026-05-30-product-bets-001",
+      "shortId": "AR-001",
+      "emoji": "📊",
+      "kind": "product-bets",
+      "title": "Onboarding drop-off bets for B2B SaaS",
+      "topic": "What product changes would most reduce trial-to-paid drop-off for a B2B workflow tool?",
+      "verdict": "keep",
+      "createdAt": "2026-05-30",
+      "featured": true,
+      "scores": { "novelty": 0.65, "actionability": 0.85, "strategicLeverage": 0.80, "evidenceQuality": 0.72, "clarity": 0.78, "overall": 0.76 },
+      "hypothesisCounts": { "generated": 6, "researched": 6, "discarded": 3, "kept": 1 },
+      "highlights": {
+        "thesis": "Trial-to-paid drop-off is a time-to-value problem. Define one activation metric, fix the blank state, and map onboarding to user intent.",
+        "recommendation": "Prioritize: activation metric → blank state → intent-fork onboarding.",
+        "topBet": "Define and instrument one verb+object activation event before any other onboarding work.",
+        "proof": "6 hypotheses · 9 queries · 6 sources · 3 bets"
+      },
+      "artifacts": {
+        "hypotheses": "runs/2026-05-30-product-bets-001/hypotheses.md",
+        "notes": "runs/2026-05-30-product-bets-001/notes.md",
+        "memo": "runs/2026-05-30-product-bets-001/memo.md",
+        "bets": "runs/2026-05-30-product-bets-001/bets.md",
+        "verdict": "runs/2026-05-30-product-bets-001/verdict.md",
+        "draft": null
+      }
+    },
+    {
+      "id": "2026-05-31-strategy-001",
+      "shortId": "AR-002",
+      "emoji": "🚀",
+      "kind": "strategy",
+      "title": "Reusable launch as the winning bet",
+      "topic": "What bold bet most increases the odds SpaceX can radically lower the cost of access to space?",
+      "verdict": "keep",
+      "createdAt": "2026-05-31",
+      "featured": false,
+      "scores": { "novelty": 0.78, "actionability": 0.80, "strategicLeverage": 0.88, "evidenceQuality": 0.82, "clarity": 0.85, "overall": 0.82 },
+      "hypothesisCounts": { "generated": 5, "researched": 5, "discarded": 4, "kept": 1 },
+      "highlights": {
+        "thesis": "Reusable launch hardware is the bet that changes launch economics at the system level — not cheaper rockets alone.",
+        "recommendation": "Reframe from cheaper rockets to cheaper access to orbit; treat recoverability as a first-order metric.",
+        "topBet": "Pressure-test recovery economics, refurbishment time, and operational cadence next.",
+        "proof": "5 hypotheses · 4 discarded · 1 system-level thesis"
+      },
+      "artifacts": {
+        "hypotheses": "runs/strategy-001/hypotheses.md",
+        "notes": "runs/strategy-001/notes.md",
+        "memo": "runs/strategy-001/memo.md",
+        "bets": "runs/strategy-001/bets.md",
+        "verdict": "runs/strategy-001/verdict.md",
+        "draft": "runs/strategy-001/draft.md"
+      }
+    }
+  ]
+  </script>
+
+  <script id="artifact-store" type="application/json">
+  {
+    "runs/2026-05-30-product-bets-001/hypotheses.md": "# Hypotheses\n\n## Search strategy\n\n- Starting question: What product changes would most reduce trial-to-paid drop-off for a B2B workflow tool?\n- Default search tools used: web search plus read-only review of the repo prompt context\n\n## Candidate hypotheses generated\n\n1. Pricing friction is the main reason trials fail to convert\n2. Missing activation metric is blocking all meaningful onboarding improvement\n3. Empty first-login experience is the highest-leverage onboarding fix\n4. Generic onboarding flow is mismatched to the user's intended job\n5. Feature gaps versus competitors are the main source of churn\n6. Lack of human sales touch is suppressing conversion\n\n## Winning thesis\n\nActivation speed is the core problem. The best bets are to define one activation metric, eliminate the blank first-login state, and align onboarding to user intent.\n\n- Why it won: explained drop-off more completely than pricing or feature-gap narratives\n- What lost: pricing friction, feature-gap theory, sales-touch theory",
+    "runs/2026-05-30-product-bets-001/notes.md": "# Source Notes\n\n## Queries used\n\n- B2B SaaS onboarding drop-off patterns 2025\n- trial to paid conversion product changes\n- activation metric benchmarks SaaS\n- SaaS blank state onboarding activation\n- onboarding segmentation by user intent SaaS\n\n## Sources\n\n- [Lenny's Newsletter — free-to-paid conversion](https://www.lennysnewsletter.com/p/what-is-a-good-free-to-paid-conversion) — free-trial: 8–12% good, 15–25% great\n- [Lenny — activation rate](https://www.lennysnewsletter.com/p/what-is-a-good-activation-rate) — aha moment definition; median SaaS activation ~25–30%\n- [Lenny — determine activation metric](https://www.lennysnewsletter.com/p/how-to-determine-your-activation) — three-step B2B process\n- [First Round — Superhuman PMF engine](https://review.firstround.com/how-superhuman-built-an-engine-to-find-product-market-fit/) — segment by very disappointed users\n- [Intercom — C.A.R.E. onboarding](https://www.intercom.com/blog/c-a-r-e-simple-framework-user-onboarding/) — progressive disclosure\n- [ChartMogul — SaaS Benchmarks](https://chartmogul.com/reports/saas-benchmarks-report/) — early-stage churn benchmarks",
+    "runs/2026-05-30-product-bets-001/memo.md": "# Memo\n\n## Thesis\n\nTrial-to-paid drop-off for B2B workflow tools is primarily a time-to-value problem, not a pricing or feature problem.\n\n## Context\n\nFor opt-in free trials, Lenny's free-to-paid survey puts good conversion at 8–12% and great at 15–25%. Activation rate is a stronger leading indicator than raw signups.\n\n## Analysis\n\n**1. No defined activation metric.** Teams track signups but not first value moment.\n\n**2. Blank state on first login.** Users need templates or guided first action (Intercom C.A.R.E.).\n\n**3. JTBD mismatch.** Onboarding designed around features, not the job the user showed up to do.\n\n## Open questions\n\n- What is the current activation metric?\n- What does first login look like today?\n- What intent do users state at signup?",
+    "runs/2026-05-30-product-bets-001/bets.md": "# Bets\n\n## Bet 1: Define and instrument one activation metric\n\n**Claim:** Without a precise activation event, onboarding experiments can't be measured.\n\n**Build / test next:** Interview 5 churned trials → define verb+object activation event → instrument baseline.\n\n---\n\n## Bet 2: Replace blank state with sample project\n\n**Claim:** First-login blank dashboards create unnecessary abandonment.\n\n**Build / test next:** Ship sample workspace. Target 10–15 pt activation lift in 30 days.\n\n---\n\n## Bet 3: Intent prompt + forked first-run flow\n\n**Claim:** Intent-matched onboarding beats generic feature tours.\n\n**Build / test next:** One signup question, 3–5 job paths, 30-day segment comparison.",
+    "runs/2026-05-30-product-bets-001/verdict.md": "# Verdict\n\n**Status:** keep\n\n**Recommendation:** Activation metric → blank state → intent-fork — in that order.\n\n## Confidence\n\nmedium-high — well-evidenced at market level; product-specific data still missing.\n\n## Proof of work\n\n- Hypotheses generated: 6 · researched: 6 · discarded: 3\n- Queries run: 9 · Sources used: 6\n\n## Why this is not higher\n\nNo product-specific activation rate or first-login UX audit yet.",
+    "runs/strategy-001/hypotheses.md": "# Hypotheses\n\nFive strategic directions evaluated:\n\n1. Tighter manufacturing discipline — **discarded**\n2. Outsourcing engine work — **discarded**\n3. Building launchpads in-house — **discarded**\n4. Competing on lower price without architecture change — **discarded**\n5. Reusable launch hardware — **advanced**\n\n## Winning thesis\n\nReusability turns launch from disposable manufacturing into a compounding operating system.",
+    "runs/strategy-001/notes.md": "# Research notes\n\nThesis-first strategy evaluation. Key frame: **cost of access to orbit**, not cost of building a rocket.\n\nCompared five strategic directions against system-level economic change, not line-item optimization.",
+    "runs/strategy-001/memo.md": "# Memo\n\n## Thesis\n\nMake launch hardware reusable enough that cost of access to orbit falls by an order of magnitude. Reusability is the wedge that turns launch into a compounding operating system.\n\n## Analysis\n\n**Cheaper rockets is too shallow** — expendable launch destroys hardware every flight.\n\n**Vertical integration helps but is not the main bet** — optimizes the expendable model.\n\n**The real target is cost of access to orbit** — recovery and relaunch amortize hardware cost.\n\n## Implications\n\n- Vehicle design must optimize for recovery and relaunch\n- Operations become as strategic as manufacturing\n- Lower launch cost enables more satellite missions",
+    "runs/strategy-001/bets.md": "# Recommendations\n\n1. Reframe objective from \"cheaper rockets\" to \"cheaper access to orbit.\"\n2. Treat recoverability and turnaround time as first-order strategic metrics.\n3. Pressure-test recovery economics, refurbishment time, and operational cadence next.",
+    "runs/strategy-001/verdict.md": "# Verdict\n\n**Status:** keep\n\n**Confidence:** high\n\nReusability is the first bet that changes launch economics at the system level. If reuse works, the rest of the roadmap becomes economically possible.",
+    "runs/strategy-001/draft.md": "# Draft — Reusable launch as the winning bet\n\n*Public-facing essay sketch derived from the strategy memo.*\n\nThe question isn't how to build rockets cheaper. It's how to make access to orbit cheap enough that the space economy becomes real.\n\nExpendable launch normalized a broken pattern: destroy the vehicle after every flight. Aviation doesn't work that way. Shipping doesn't work that way. Reusability is the first mechanism that changes launch economics at the system level — not one layer of the stack, but the structure of the business itself.\n\nIf boosters fly again, hardware cost amortizes across missions, cadence rises, and operational learning compounds. Cheaper manufacturing and better suppliers help, but they don't change the fact that a one-use vehicle resets economics after every launch.\n\nThe roadmap implication is blunt: optimize for recovery and turnaround, not just ascent performance. Treat recoverability as a first-order metric alongside reliability and cost.\n\n*Draft only — human review before publishing.*"
+  }
+  </script>
+
+  <script>
+    /* Local-only viewer: all run data is embedded below. No fetch or external imports. */
+    const RUNS = JSON.parse(document.getElementById("runs-json").textContent);
+    const ARTIFACTS = JSON.parse(document.getElementById("artifact-store").textContent);
+
+    const TABS = [
+      { id: "hypotheses", label: "Hypotheses" },
+      { id: "notes", label: "Notes" },
+      { id: "memo", label: "Memo" },
+      { id: "bets", label: "Bets" },
+      { id: "verdict", label: "Verdict" },
+      { id: "draft", label: "Draft" },
+      { id: "scores", label: "Scores" }
+    ];
+
+    let selectedId = RUNS[0].id;
+    let activeTab = "memo";
+    let searchQuery = "";
+    let sortBy = "date-desc";
+    let filterKind = "";
+    let filterVerdict = "";
+
+    function md(text) {
+      if (!text) return "";
+      let html = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      html = html.replace(/^### (.+)$/gm, "<h3>$1</h3>");
+      html = html.replace(/^## (.+)$/gm, "<h2>$1</h2>");
+      html = html.replace(/^# (.+)$/gm, "<h1>$1</h1>");
+      html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
+      html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
+        const safe = url.startsWith("https://") || url.startsWith("http://");
+        const attrs = safe
+          ? ' href="' + url + '" rel="noopener noreferrer" referrerpolicy="no-referrer"'
+          : ' href="#"';
+        return "<a" + attrs + ">" + label + "</a>";
+      });
+      html = html.replace(/^- (.+)$/gm, "<li>$1</li>");
+      html = html.replace(/(<li>.*<\/li>\n?)+/gs, m => `<ul>${m}</ul>`);
+      html = html.replace(/^\d+\. (.+)$/gm, "<li>$1</li>");
+      html = html.replace(/^---$/gm, "<hr>");
+      html = html.split("\n\n").map(block => {
+        if (/^<(h[123]|ul|hr)/.test(block.trim())) return block;
+        return `<p>${block.replace(/\n/g, "<br>")}</p>`;
+      }).join("\n");
+      return html;
+    }
+
+    function getRun(id) {
+      return RUNS.find(r => r.id === (id || selectedId));
+    }
+
+    function getArtifact(run, key) {
+      const ref = run.artifacts[key];
+      if (!ref) return null;
+      return ARTIFACTS[ref] || null;
+    }
+
+    function filterAndSortRuns() {
+      let list = [...RUNS];
+      const q = searchQuery.trim().toLowerCase();
+      if (q) {
+        list = list.filter(r =>
+          [r.title, r.topic, r.kind, r.shortId, r.id, r.verdict].join(" ").toLowerCase().includes(q)
+        );
+      }
+      if (filterKind) list = list.filter(r => r.kind === filterKind);
+      if (filterVerdict) list = list.filter(r => r.verdict === filterVerdict);
+
+      list.sort((a, b) => {
+        switch (sortBy) {
+          case "date-asc": return a.createdAt.localeCompare(b.createdAt);
+          case "score-desc": return b.scores.overall - a.scores.overall;
+          case "score-asc": return a.scores.overall - b.scores.overall;
+          case "title": return a.title.localeCompare(b.title);
+          default: return b.createdAt.localeCompare(a.createdAt);
+        }
+      });
+      return list;
+    }
+
+    function renderSidebar() {
+      const list = filterAndSortRuns();
+      document.getElementById("run-count").textContent = `${list.length} run${list.length === 1 ? "" : "s"}`;
+
+      const el = document.getElementById("run-list");
+      if (!list.length) {
+        el.innerHTML = `<div class="no-results">No runs match your search or filters.</div>`;
+        return;
+      }
+
+      el.innerHTML = list.map(run => `
+        <div class="run-row ${run.id === selectedId ? "is-active" : ""}" data-id="${run.id}" role="button" tabindex="0">
+          <span class="run-row__emoji">${run.emoji}</span>
+          <div class="run-row__body">
+            <div class="run-row__title">${run.title}</div>
+            <div class="run-row__meta">
+              <span>${run.shortId}</span>
+              <span>·</span>
+              <span class="run-row__score">${run.scores.overall.toFixed(2)}</span>
+              <span>·</span>
+              <span>${run.kind.replace(/-/g, " ")}</span>
+            </div>
+          </div>
+        </div>
+      `).join("");
+
+      el.querySelectorAll(".run-row").forEach(row => {
+        const pick = () => { selectedId = row.dataset.id; render(); };
+        row.addEventListener("click", pick);
+        row.addEventListener("keydown", e => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); }
+        });
+      });
+    }
+
+    function renderHeader(run) {
+      const h = run.highlights;
+      document.getElementById("page-header").innerHTML = `
+        <header class="run-header">
+          <div class="run-header__row">
+            <span class="run-header__id">${run.shortId}</span>
+            <h1 class="run-header__title">${run.title}</h1>
+            <div class="run-header__meta">
+              <span class="chip chip--kind">${run.kind}</span>
+              <span class="chip chip--keep">${run.verdict}</span>
+              <span class="chip chip--score">${run.scores.overall.toFixed(2)}</span>
+            </div>
+          </div>
+          <div class="run-header__sub">
+            <span class="run-header__thesis">${h.thesis}</span>
+            <span class="run-header__proof">${h.proof}</span>
+          </div>
+        </header>
+      `;
+    }
+
+    function renderIntro(run) {
+      const h = run.highlights;
+      return `
+        <section class="run-intro">
+          <p class="run-intro__topic">${run.topic}</p>
+          <div class="run-intro__grid">
+            <div class="run-intro__cell">
+              <div class="run-intro__label">Recommendation</div>
+              <div class="run-intro__text">${h.recommendation}</div>
+            </div>
+            <div class="run-intro__cell">
+              <div class="run-intro__label">Top bet</div>
+              <div class="run-intro__text"><strong>${h.topBet}</strong></div>
+            </div>
+            <div class="run-intro__cell">
+              <div class="run-intro__label">Run</div>
+              <div class="run-intro__text">${run.id}${run.featured ? " · Example" : ""} · ${run.createdAt}</div>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderTabs(run) {
+      document.getElementById("tabs").innerHTML = TABS.map(tab => {
+        const hasContent = tab.id === "scores" || !!getArtifact(run, tab.id);
+        return `<button class="tab ${activeTab === tab.id ? "is-active" : ""} ${hasContent ? "" : "is-empty"}"
+          data-tab="${tab.id}">${tab.label}</button>`;
+      }).join("");
+
+      document.getElementById("tabs").querySelectorAll(".tab").forEach(btn => {
+        btn.addEventListener("click", () => {
+          activeTab = btn.dataset.tab;
+          renderContent();
+          renderTabs(run);
+        });
+      });
+    }
+
+    function renderScores(run) {
+      return `
+        <div class="score-grid">
+          ${Object.entries(run.scores).map(([k, v]) => `
+            <div class="score-cell">
+              <div class="score-cell__label">${k.replace(/([A-Z])/g, " $1").trim()}</div>
+              <div class="score-cell__val">${v.toFixed(2)}</div>
+              <div class="score-cell__bar"><div class="score-cell__fill" style="width:${v * 100}%"></div></div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderContent() {
+      const run = getRun();
+      const introEl = document.getElementById("run-intro");
+      const el = document.getElementById("tab-content");
+
+      if (!run) {
+        introEl.innerHTML = "";
+        el.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state__icon">📋</div>
+            <div class="empty-state__title">Select a run</div>
+            <div class="empty-state__text">Choose a run from the sidebar to view its artifacts.</div>
+          </div>`;
+        return;
+      }
+
+      introEl.innerHTML = renderIntro(run);
+
+      if (activeTab === "scores") {
+        el.innerHTML = renderScores(run);
+        return;
+      }
+
+      const content = getArtifact(run, activeTab);
+      if (!content) {
+        el.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state__icon">📝</div>
+            <div class="empty-state__title">No ${activeTab} for this run</div>
+            <div class="empty-state__text">This run has no ${activeTab} artifact yet. Strong founder-writing or strategy runs may include a public draft here after review.</div>
+          </div>`;
+        return;
+      }
+
+      el.innerHTML = md(content);
+    }
+
+    function render() {
+      const visible = filterAndSortRuns();
+      if (!visible.find(r => r.id === selectedId) && visible.length) {
+        selectedId = visible[0].id;
+      }
+      const run = getRun();
+      renderSidebar();
+      if (run) {
+        renderHeader(run);
+        renderTabs(run);
+      }
+      renderContent();
+    }
+
+    document.getElementById("search").addEventListener("input", e => {
+      searchQuery = e.target.value;
+      render();
+    });
+    document.getElementById("sort").addEventListener("change", e => {
+      sortBy = e.target.value;
+      render();
+    });
+    document.getElementById("filter-kind").addEventListener("change", e => {
+      filterKind = e.target.value;
+      render();
+    });
+    document.getElementById("filter-verdict").addEventListener("change", e => {
+      filterVerdict = e.target.value;
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>

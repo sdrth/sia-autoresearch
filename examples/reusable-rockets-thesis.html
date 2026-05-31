@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reusable Launch as the Winning Bet · sia-autoresearch Example</title>
+  <style>
+    :root {
+      --bg: #f6f3ee;
+      --surface: rgba(255, 255, 255, 0.76);
+      --surface-strong: rgba(255, 255, 255, 0.92);
+      --surface-dark: #111111;
+      --text: #161616;
+      --muted: #6d6d73;
+      --line: rgba(17, 17, 17, 0.08);
+      --line-strong: rgba(17, 17, 17, 0.14);
+      --accent: #0f6fff;
+      --accent-soft: rgba(15, 111, 255, 0.10);
+      --success: #0f8a5f;
+      --shadow: 0 24px 80px rgba(17, 17, 17, 0.08);
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+      --page: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, #ffffff 0%, #f7f4ef 26%, #f1ece5 58%, #ece6de 100%);
+      font-family: "SF Pro Display", "SF Pro Text", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 14% 10%, rgba(255, 255, 255, 0.95), transparent 24%),
+        radial-gradient(circle at 84% 0%, rgba(15, 111, 255, 0.08), transparent 20%),
+        radial-gradient(circle at 70% 72%, rgba(15, 138, 95, 0.06), transparent 18%);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      width: min(var(--page), calc(100vw - 40px));
+      margin: 0 auto;
+      padding: 22px 0 56px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 6px 0 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      letter-spacing: 0.01em;
+      color: var(--muted);
+    }
+
+    .brand__dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #2a80ff, #7eb2ff);
+      box-shadow: 0 0 0 8px rgba(15, 111, 255, 0.09);
+    }
+
+    .brand strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .topbar__links {
+      display: inline-flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .link-pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.56);
+      color: var(--muted);
+      backdrop-filter: blur(14px);
+      font-size: 0.9rem;
+    }
+
+    .hero {
+      padding: 38px 40px 34px;
+      border: 1px solid rgba(255, 255, 255, 0.92);
+      border-radius: 38px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.90)),
+        linear-gradient(135deg, rgba(15, 111, 255, 0.04), rgba(15, 138, 95, 0.02));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -70px;
+      top: -80px;
+      width: 240px;
+      height: 240px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(15, 111, 255, 0.10), transparent 66%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .hero__grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+      gap: 26px;
+      align-items: end;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 10ch;
+      font-size: clamp(3.2rem, 8vw, 6rem);
+      line-height: 0.92;
+      letter-spacing: -0.065em;
+      font-weight: 650;
+    }
+
+    .hero__summary {
+      margin: 22px 0 0;
+      max-width: 52ch;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.55;
+    }
+
+    .hero__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.70);
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .chip--strong {
+      background: var(--surface-dark);
+      border-color: transparent;
+      color: #f4f4f6;
+    }
+
+    .chip--soft {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: rgba(15, 111, 255, 0.08);
+    }
+
+    .hero__side {
+      display: grid;
+      gap: 14px;
+    }
+
+    .score {
+      padding: 18px 18px 16px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.68);
+      border: 1px solid var(--line);
+    }
+
+    .score__top {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .score__label {
+      color: var(--muted);
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .score__overall {
+      font-size: 3rem;
+      line-height: 1;
+      letter-spacing: -0.06em;
+      font-weight: 650;
+    }
+
+    .bars {
+      display: grid;
+      gap: 12px;
+    }
+
+    .bar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    .bar__track {
+      grid-column: 1 / -1;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(17, 17, 17, 0.07);
+      overflow: hidden;
+    }
+
+    .bar__fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #2a80ff, #66a4ff);
+    }
+
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .fact {
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.68);
+      border: 1px solid var(--line);
+    }
+
+    .fact__label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .fact__value {
+      font-size: 0.96rem;
+      line-height: 1.45;
+    }
+
+    .stack {
+      display: grid;
+      gap: 22px;
+      margin-top: 24px;
+    }
+
+    .section {
+      padding: 30px 32px;
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.92);
+      background: linear-gradient(180deg, var(--surface), var(--surface-strong));
+      box-shadow: var(--shadow);
+    }
+
+    .section--dark {
+      background:
+        radial-gradient(circle at top right, rgba(42, 128, 255, 0.18), transparent 30%),
+        linear-gradient(180deg, #131416, #111214 62%, #0d0d0f);
+      border-color: rgba(255, 255, 255, 0.04);
+      color: #f2f3f5;
+    }
+
+    .section h2 {
+      margin: 0 0 14px;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      line-height: 1.02;
+      letter-spacing: -0.05em;
+      font-weight: 630;
+    }
+
+    .section__lede {
+      margin: 0 0 18px;
+      max-width: 62ch;
+      color: var(--muted);
+      font-size: 1.04rem;
+      line-height: 1.6;
+    }
+
+    .prose {
+      display: grid;
+      gap: 16px;
+      max-width: 72ch;
+      font-size: 1.02rem;
+      line-height: 1.7;
+    }
+
+    .prose p,
+    .prose blockquote {
+      margin: 0;
+    }
+
+    .prose blockquote {
+      padding: 18px 20px;
+      border-radius: 22px;
+      background: rgba(15, 111, 255, 0.06);
+      color: var(--text);
+      font-size: 1.08rem;
+      line-height: 1.6;
+      letter-spacing: -0.01em;
+    }
+
+    .section--dark .prose blockquote {
+      background: rgba(255, 255, 255, 0.08);
+      color: #f7f8fa;
+    }
+
+    .columns {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 26px;
+      align-items: start;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .mini {
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.68);
+      border: 1px solid var(--line);
+    }
+
+    .mini__kicker {
+      display: inline-block;
+      margin-bottom: 10px;
+      color: var(--accent);
+      font-size: 0.74rem;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .mini h3 {
+      margin: 0 0 10px;
+      font-size: 1.08rem;
+      line-height: 1.16;
+      letter-spacing: -0.03em;
+      font-weight: 620;
+    }
+
+    .mini p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .list-item {
+      padding: 16px 18px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.66);
+      border: 1px solid var(--line);
+    }
+
+    .list-item strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .list-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .proof {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .proof__card {
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .proof__card span {
+      display: block;
+      color: rgba(242, 243, 245, 0.72);
+      font-size: 0.76rem;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .proof__card strong {
+      font-size: 2rem;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      font-weight: 650;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: 1px solid var(--line-strong);
+      background: rgba(255, 255, 255, 0.78);
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+
+    .button--dark {
+      background: #f5f7fb;
+      border-color: transparent;
+      color: #101114;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 24px;
+      padding: 0 4px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 980px) {
+      .hero__grid,
+      .columns,
+      .cards,
+      .proof {
+        grid-template-columns: 1fr;
+      }
+
+      .hero,
+      .section {
+        padding-left: 22px;
+        padding-right: 22px;
+      }
+
+      h1 { max-width: none; }
+    }
+
+    @media (max-width: 640px) {
+      .page { width: min(var(--page), calc(100vw - 20px)); }
+      .topbar,
+      .footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .facts {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="topbar">
+      <div class="brand">
+        <span class="brand__dot" aria-hidden="true"></span>
+        <span><strong>sia-autoresearch</strong> example viewer</span>
+      </div>
+      <div class="topbar__links">
+        <a class="link-pill" href="README.md">Examples</a>
+        <a class="link-pill" href="reusable-rockets-thesis.md">Markdown artifact</a>
+      </div>
+    </div>
+
+    <section class="hero">
+      <p class="eyebrow">2026-05-31-strategy-001 · SpaceX · reusable launch</p>
+      <div class="hero__grid">
+        <div>
+          <h1>Reusable launch wins because it changes the system.</h1>
+          <p class="hero__summary">Expendable launch destroys the most expensive hardware every flight. Reusability amortizes that capital across many missions, raises cadence, and compounds operational learning — the only credible path to an order-of-magnitude drop in access cost.</p>
+          <div class="hero__meta">
+            <span class="chip chip--strong">Verdict · keep</span>
+            <span class="chip chip--soft">Confidence · high</span>
+            <span class="chip">Run kind · strategy</span>
+            <span class="chip">Score · 0.82</span>
+          </div>
+        </div>
+        <div class="hero__side">
+          <div class="score">
+            <div class="score__top">
+              <span class="score__label">Overall score</span>
+              <strong class="score__overall">0.82</strong>
+            </div>
+            <div class="bars">
+              <div class="bar">
+                <span>Novelty</span><span>0.74</span>
+                <div class="bar__track"><div class="bar__fill" style="width:74%"></div></div>
+              </div>
+              <div class="bar">
+                <span>Actionability</span><span>0.86</span>
+                <div class="bar__track"><div class="bar__fill" style="width:86%"></div></div>
+              </div>
+              <div class="bar">
+                <span>Strategic leverage</span><span>0.94</span>
+                <div class="bar__track"><div class="bar__fill" style="width:94%"></div></div>
+              </div>
+              <div class="bar">
+                <span>Evidence quality</span><span>0.77</span>
+                <div class="bar__track"><div class="bar__fill" style="width:77%"></div></div>
+              </div>
+              <div class="bar">
+                <span>Clarity</span><span>0.81</span>
+                <div class="bar__track"><div class="bar__fill" style="width:81%"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="facts">
+            <div class="fact">
+              <span class="fact__label">Question</span>
+              <div class="fact__value">What next bold bet most lowers the cost of access to space?</div>
+            </div>
+            <div class="fact">
+              <span class="fact__label">Primary output</span>
+              <div class="fact__value">Memo, recommendations, verdict</div>
+            </div>
+            <div class="fact">
+              <span class="fact__label">Decision rule</span>
+              <div class="fact__value">The winning idea must change launch economics, not just trim costs.</div>
+            </div>
+            <div class="fact">
+              <span class="fact__label">Next to validate</span>
+              <div class="fact__value">Recovery economics, turnaround, payload tradeoffs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="stack">
+      <section class="section">
+        <p class="eyebrow">Thesis</p>
+        <h2>The winning bet is reusable launch, not generic cost reduction.</h2>
+        <div class="prose">
+          <p>The winning bet is not “make rockets a bit cheaper.” It is to make launch hardware reusable enough that the cost of getting payloads to orbit falls by an order of magnitude over time. Reusability turns launch from expensive disposable manufacturing into a compounding operating system.</p>
+          <blockquote>The right question is not “How do we make rockets cheaper?” but “How do we make access to orbit radically cheaper over repeated flights?”</blockquote>
+          <p>Incumbent economics assumed expendable vehicles: build, fly once, discard. Marginal manufacturing improvements cannot fix a model that throws away the asset.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="columns">
+          <div>
+            <p class="eyebrow">Analysis</p>
+            <h2>Cheaper rockets alone does not change the economics.</h2>
+            <p class="section__lede">Several directions were plausible. Only one changes launch economics at the system level instead of trimming a cost line inside the expendable model.</p>
+            <div class="prose">
+              <p>Cheaper manufacturing helps, but expendable rockets still destroy expensive hardware every flight. Outsourcing may improve procurement, but it does not create a durable operational advantage. Building launchpads in-house tightens control, yet remains downstream of the central question.</p>
+              <p>Recovery and relaunch amortize hardware cost, raise cadence, and compound learning with each flight. No transportation system becomes abundant if the vehicle is destroyed after one use.</p>
+            </div>
+          </div>
+          <div>
+            <p class="eyebrow">Alternatives considered</p>
+            <div class="cards">
+              <article class="mini">
+                <span class="mini__kicker">Discarded</span>
+                <h3>Cheaper rockets</h3>
+                <p>Optimizes manufacturing without changing expendable economics. Economics reset every flight.</p>
+              </article>
+              <article class="mini">
+                <span class="mini__kicker">Discarded</span>
+                <h3>Outsource engines</h3>
+                <p>Reduces cost pressure. Does not create a durable wedge or raise launch cadence.</p>
+              </article>
+              <article class="mini">
+                <span class="mini__kicker">Keep</span>
+                <h3>Reusable launch</h3>
+                <p>Amortizes hardware, raises cadence, compounds operational learning. Changes the cost curve.</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="columns">
+          <div>
+            <p class="eyebrow">Why it won</p>
+            <h2>Reusability beats the other bets because it changes the whole cost curve.</h2>
+            <div class="prose">
+              <p>Reusability absorbs what was attractive in the other directions — lower manufacturing burden, tighter control, cheaper satellite deployment — but adds repeated use of the same asset.</p>
+              <p>Optimize for cheaper access to orbit, not cheaper rockets. Vehicle design, operations, and reliability all shift once recovery and relaunch are first-order constraints.</p>
+            </div>
+          </div>
+          <div>
+            <p class="eyebrow">Recommendations</p>
+            <div class="list">
+              <div class="list-item">
+                <strong>Reframe the company objective.</strong>
+                <p>Move from “cheaper rockets” to “dramatically cheaper access to space.”</p>
+              </div>
+              <div class="list-item">
+                <strong>Treat recoverability as strategic.</strong>
+                <p>Recovery rate, turnaround, and refurbishment cost belong at the center of the roadmap.</p>
+              </div>
+              <div class="list-item">
+                <strong>Pressure-test recovery economics next.</strong>
+                <p>Model refurbishment time, payload tradeoffs, and launch cadence before committing the full development program.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section--dark">
+        <p class="eyebrow" style="color: rgba(242,243,245,0.72);">Proof of work</p>
+        <div class="proof">
+          <div class="proof__card"><span>Hypotheses</span><strong>11</strong></div>
+          <div class="proof__card"><span>Researched</span><strong>5</strong></div>
+          <div class="proof__card"><span>Discarded</span><strong>4</strong></div>
+          <div class="proof__card"><span>Winning thesis</span><strong>1</strong></div>
+        </div>
+        <h2>If reuse works, the rest of the roadmap becomes economically possible.</h2>
+        <div class="prose">
+          <p>If reuse fails, launch remains constrained by disposable economics. If reuse works, boosters become assets that compound operational learning instead of being discarded after each mission.</p>
+          <blockquote>Reusability is not one optimization among many. It is the central bet that unlocks every downstream ambition.</blockquote>
+          <p>Cheaper manufacturing, outsourcing, and infrastructure control are incomplete on their own. Reusability is the first direction that is bold enough and concrete enough at the same time.</p>
+        </div>
+        <div class="actions">
+          <a class="button button--dark" href="reusable-rockets-thesis.md">Open markdown artifact</a>
+          <a class="button" href="README.md">Browse examples</a>
+        </div>
+      </section>
+
+      <section class="section">
+        <p class="eyebrow">Open questions</p>
+        <h2>What still needs validation.</h2>
+        <div class="cards">
+          <article class="mini">
+            <span class="mini__kicker">Economics</span>
+            <h3>Build the reuse cost model.</h3>
+            <p>Compare expendable versus reusable launch economics across repeated flights, refurbishment assumptions, and failure scenarios.</p>
+          </article>
+          <article class="mini">
+            <span class="mini__kicker">Operations</span>
+            <h3>Map turnaround constraints.</h3>
+            <p>Identify which recovery, inspection, and refurbishment steps limit cadence and where design should change to support relaunch.</p>
+          </article>
+          <article class="mini">
+            <span class="mini__kicker">Roadmap</span>
+            <h3>Sequence the reuse program.</h3>
+            <p>Decide what gets reused first, what performance tradeoffs are acceptable, and how the development program should stage risk.</p>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <footer class="footer">
+      <span>Self-contained example viewer</span>
+      <a href="reusable-rockets-thesis.md">reusable-rockets-thesis.md</a>
+    </footer>
+  </main>
+</body>
+</html>
