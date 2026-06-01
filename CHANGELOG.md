@@ -4,6 +4,7 @@
 
 ### Docs
 
+- `AGENTS.md` + spec: `runs/` + compact chat indexes, deeper research per run; Q10c static viewer (simple vs interactive, no server by default); Q11 + `audience.md` for plain language when needed.
 - `start/AUTORESEARCH-START.md`: setup interview should be interactive; use structured question tools (e.g. `AskQuestion`) when available instead of posting all questions in one message.
 - `start/AUTORESEARCH-START.md`: inline viewer should foreground the latest run summary first, then agent picks, all runs, memory, activity, and proof of work.
 

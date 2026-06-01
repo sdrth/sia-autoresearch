@@ -54,13 +54,14 @@ When asked to "run autoresearch" or "start autoresearch":
    | **Setup gate** | `config/setup.md` | `autoresearch/config/setup.md` |
    | **Runs** | `runs/` | `autoresearch/runs/` |
    | **Living memory** | `notes/autoresearch.md` | `autoresearch/notes/autoresearch.md` |
-   | **Viewer (optional)** | chosen at setup (Q10b) | chosen at setup (Q10b) |
+   | **Viewer** | inline at setup by default (Q10b) | inline at setup by default (Q10b) |
 
    In **standalone lab** mode (this repo's layout), shipped reference material lives at
    `start/`, `examples/`, and public docs — read them, do not rewrite them without
    explicit approval. Create runtime lab artifacts at repo root: `config/`, `notes/`,
-   `runs/`, `publishing/`. A viewer is **not** shipped with the repo; demo viewers live
-   in `examples/`. The owner and agent choose viewer style during setup (Q10b).
+   `runs/`, `publishing/`, and `<lab>/dashboard/` (inline viewer). A viewer is **not**
+   shipped with the repo; demo viewers live in `examples/`. Default at setup: agent
+   builds `dashboard/index.html` (Q10b `inline`) unless the owner chooses otherwise.
 
    In **embedded mode**, create and edit only under `autoresearch/`. Read the
    surrounding repo read-only for context.
@@ -99,12 +100,16 @@ When asked to "run autoresearch" or "start autoresearch":
 12. **Score with restraint.** A completed run is not automatically a strong run. High
     scores must be earned through non-obvious signal, evidence quality, and clear
     comparative advantage over discarded branches.
-13. **Use extra reasoning capacity when available.** If the current agent has access to
-    stronger models, subagents, or parallel research helpers, it may use them
-    deliberately for bounded subtasks such as parallel search, hypothesis validation,
-    or source gathering. The parent agent remains responsible for final judgment,
-    synthesis, and scoring.
-14. **No bundled network services.** This spec does not ship telemetry, analytics, or
+13. **Go deep on every run.** Before synthesis, run multiple web-search branches; scan
+    the repo read-only when embedded or when lab notes/code exist; and use subagents or
+    stronger models proactively for parallel branches when available (not optional
+    extras). The parent agent remains responsible for final judgment, synthesis, and scoring.
+14. **Chat is an index, not the archive.** Write full artifacts only under
+    `<lab>/runs/<run-id>/` and the viewer. Post a compact per-run block in chat (section
+    14) — never paste full `memo.md`, `hypotheses.md`, `notes.md`, or long `verdict.md`
+    prose into the main conversation.
+15. **Match Q11** — `config/styles/audience.md`; plain owner-facing text when not technical.
+16. **No bundled network services.** This spec does not ship telemetry, analytics, or
     sia-autoresearch-specific API calls. Use only the agent, tools, and MCP servers
     the owner already runs. Web research uses the agent's **default built-in search**
     — not a custom search backend from this repo.
@@ -342,14 +347,20 @@ owner preference. **There is no committed dashboard in the sia-autoresearch repo
 use `examples/` (especially `reusable-rockets-thesis.html`) as reference demos only.
 
 Options:
-- `skip` — no viewer; read runs directly from `runs/` and chat reports (valid default for minimal setup)
-- `inline` — agent builds a self-contained `<lab>/dashboard/index.html` and updates it after runs (section 15A). Design is the agent's choice.
+- `skip` — no viewer; read runs directly from `runs/` only (owner must opt in explicitly)
+- `inline` — **default:** agent builds a self-contained static `<lab>/dashboard/index.html` at setup (per Q10c) and updates it after runs (section 15A). Design is the agent's choice.
 - `guided` — agent writes `<lab>/dashboard/SPEC.md` + `<lab>/dashboard/BUILD-GUIDE.md` describing what the viewer should support; a follow-up agent or owner implements it in whatever stack they use (section 15B)
 - `both` — inline viewer for immediate use plus spec + guide for a richer viewer later
 
-*Agent recommendation:* [pick one and say why — prefer `skip` when the owner will read runs in chat or markdown; prefer `inline` or `guided` when browsing history matters; cite `examples/` when showing what a viewer could look like]
+*Agent recommendation:* [default `inline` at setup unless the owner wants zero UI — cite `examples/` when showing what a viewer could look like; never rely on pasting full runs in chat]
 
-1. Post the repo snapshot, then ask Q1–Q10b interactively (see above).
+**Q10c. Viewer experience** *(if Q10b ≠ `skip` — ask)*  
+Simple static (`static-simple`: list + links) or static interactive (`static-interactive`: search/tabs; see `examples/dashboard.html`). One HTML file, `file://`, no server/npm. No Next/Vite/Express unless the owner explicitly opts in.
+
+**Q11. Reader & language** *(every setup)*  
+`technical` | `general` (default if unsure) | `mixed`. Write `config/styles/audience.md`. For `general`/`mixed`: plain chat, memos, and viewer; no agent jargon unless the owner uses it; keep evidence and scores rigorous.
+
+1. Post the repo snapshot, then ask Q1–Q11 interactively (see above).
 2. Ask the owner to reply inline (e.g. `Q2: …`, `Q4: …`) or say "accept all
    recommendations."
 3. Do **not** create run folders or query seeds until answers are captured.
@@ -431,6 +442,16 @@ interviewedBy: agent-id
 **Recommendation:** ...
 **Owner answer:** ...
 
+### Viewer (Q10b + Q10c)
+
+- **Style (Q10b):** ...
+- **Experience (Q10c):** `static-simple` | `static-interactive` | ...
+
+### Audience (Q11)
+
+- **Level:** `technical` | `general` | `mixed`
+- **Primary reader:** ...
+
 [Repeat for Q2–Q9 and any follow-ups]
 ```
 
@@ -440,11 +461,12 @@ Then **derive config from setup** (still only under `<lab>/`):
 - `<lab>/config/queries/seeds.json` ← focus topics as initial seeds
 - `<lab>/config/sources/seeds.json` ← 5–10 sources relevant to focus topics (web search OK)
 - `<lab>/config/styles/voice.md` ← only if output mode includes public drafts
+- `<lab>/config/styles/audience.md` ← Q11 language level and plain-language rules
 - `<lab>/notes/autoresearch.md` ← objective + enabled kinds + link to setup
 - `<lab>/.gitignore` ← generated from Q9 answers (section 5 defaults + owner overrides)
-- **If Q10b = `inline` or `both`:** `<lab>/dashboard/index.html` ← agent-designed viewer; update after runs
-- **If Q10b = `guided` or `both`:** `<lab>/dashboard/SPEC.md` + `<lab>/dashboard/BUILD-GUIDE.md` ← agent customizes the template at `start/viewer/BUILD-GUIDE.template.md`
-- **If Q10b = `skip`:** no viewer files — runs live in `runs/` only
+- **Q10b `inline` or `both`:** `<lab>/dashboard/index.html` (static per Q10c; seed empty at setup)
+- **Q10b `guided` or `both`:** `<lab>/dashboard/SPEC.md` + `BUILD-GUIDE.md` (from `start/viewer/BUILD-GUIDE.template.md`)
+- **Q10b `skip`:** no viewer files
 
 Append to `<lab>/runs/autoresearch.jsonl`:
 
@@ -469,7 +491,7 @@ Phase 1 — Setup (required):
 
 Phase 2 — First loop (after setup):
 7. Run loop 001 using the agreed kind + topic from setup (section 9)
-8. Report verdict, score, and top findings in chat
+8. Report only the compact per-run index in chat (section 14); full artifacts in `runs/` + viewer
 ```
 
 ---
@@ -492,7 +514,9 @@ When `start/AUTORESEARCH-START.md` exists, bootstrap at **repo root**:
 │   ├── objective.md
 │   ├── queries/seeds.json
 │   ├── sources/seeds.json
-│   └── styles/voice.md
+│   └── styles/
+│       ├── audience.md      ← Q11 language level (always at setup)
+│       └── voice.md         ← writing tone (if applicable)
 ├── notes/
 │   └── autoresearch.md
 ├── runs/
@@ -520,7 +544,9 @@ autoresearch/
 │   ├── objective.md           ← what this lab optimizes for
 │   ├── queries/seeds.json     ← search query seeds + weights
 │   ├── sources/seeds.json     ← trusted source list
-│   └── styles/voice.md        ← writing tone (if applicable)
+│   └── styles/
+│       ├── audience.md      ← Q11 language level (always at setup)
+│       └── voice.md         ← writing tone (if applicable)
 ├── notes/
 │   └── autoresearch.md        ← living memory (create)
 ├── runs/
@@ -545,7 +571,7 @@ without explicit approval.
 Start here: `start/AUTORESEARCH-START.md` (standalone) or `AUTORESEARCH-START.md` (embedded)
 Living memory: `notes/autoresearch.md`
 Run log: `runs/autoresearch.jsonl`
-Viewer: optional — see `config/setup.md` → Q10b
+Viewer: static `dashboard/index.html` if enabled (Q10b/Q10c); see `config/setup.md`
 ```
 
 ### `config/objective.md` (create — adapt to repo)
@@ -599,6 +625,16 @@ a query produces discard-quality output.
 - Lead with the insight; support with evidence and links.
 - Internal memos: dense and strategic.
 - Public drafts: compressed and readable.
+```
+
+### `config/styles/audience.md` (create at setup — from Q11)
+
+```markdown
+# Audience
+
+- Level: general | technical | mixed
+- Primary reader: [who reads outputs]
+- Rules: plain owner-facing text for general/mixed; mirror owner's terms; rigorous on evidence
 ```
 
 ---
@@ -1010,8 +1046,9 @@ Execute in order:
    Do not jump from the first idea straight into the memo.
 3. **Optimize search branches** — self-improve the keywords, synonyms, and framing for
    each candidate using `config/queries/seeds.json` as a starting point, not a limit.
-4. **Research with default search tools** — run live searches, gather evidence, and
-   test the best candidate branches. Preserve the exact queries you actually used.
+4. **Research deeply** — run live web searches across multiple branches; scan the repo
+   read-only when embedded or when local context exists; delegate distinct branches to
+   subagents when available. Preserve the exact queries you actually used.
 5. **Write `hypotheses.md`** — capture generated candidates, shortlisted branches,
    discarded branches, and why the winner advanced.
 6. **Write `notes.md`** — links first, then query evolution, then observations.
@@ -1033,13 +1070,13 @@ Execute in order:
     reverse press release is present.
 16. **Review file** — if `send_for_review`, create from publishing template (section 11);
     include reverse press release in draft body or link to memo section when relevant.
-17. **Viewer** — if Q10b enabled one, update it (section 15); otherwise skip.
-18. **Report** — post the per-run report in chat (section 14), including how many
-    hypotheses were generated, tested, discarded, and why the kept thesis won.
+17. **Viewer** — update `<lab>/dashboard/index.html` when enabled (Q10b/Q10c; default inline).
+18. **Report** — post only the compact per-run index in chat (section 14). Do not paste
+    run artifacts; hypothesis counts belong in one line with a pointer to `hypotheses.md`.
 
 ### When stronger agents or subagents are available
 
-Use them as accelerators, not replacements for judgment.
+Use them proactively on every run as accelerators, not replacements for judgment.
 
 - Good uses:
   - parallel source gathering across distinct search branches
@@ -1207,25 +1244,30 @@ Single-on-demand (default): agent runs one loop, posts the report, then stops.
 
 ### Per-run report (required in chat after every run)
 
-Post this block in chat immediately after completing a run:
+Post **only** this compact index in chat immediately after completing a run. Full memos,
+hypotheses, notes, bets, essays, and verdict prose stay in the run folder and viewer.
+
+**Do not paste** `memo.md`, `hypotheses.md`, `notes.md`, `bets.md`, `essay.md`, or
+multi-paragraph `verdict.md` into the main conversation.
 
 ```
 ## Run complete: [run-id]
 **Kind:** [kind] | **Score:** [overall] | **Verdict:** [verdict]
 **Topic:** [topic]
 **Top findings:**
-1. [finding]
-2. [finding]
-3. [finding]
+1. [one line]
+2. [one line]
+3. [one line]
+**Proof:** [N] generated, [M] researched, [K] discarded — details in `hypotheses.md`
 **Run folder:** `<lab>/runs/[run-id]/`
-**Viewer:** [path if enabled, or "runs/ only"]
+**Viewer:** `<lab>/dashboard/index.html` (or path if guided/both; or "runs/ only" if skip)
 ```
 
 ### Continuous loop flow
 
 1. Complete run N using the single-run workflow (section 9).
 2. Post per-run report in chat.
-3. Update viewer if Q10b enabled one (section 15).
+3. Update viewer if enabled (section 15; default inline `index.html`).
 4. Update living memory (section 10).
 5. If more loops remain: pick next topic from `<lab>/config/queries/seeds.json` (highest weight, not recently used in this batch), assign next run id, continue from step 1.
 6. After the final loop: post a batch summary (section 13 format).
@@ -1239,11 +1281,14 @@ Post this block in chat immediately after completing a run:
 
 ---
 
-## 15. Viewer (Optional)
+## 15. Viewer
 
 **No viewer is shipped with sia-autoresearch.** Demo viewers live in `examples/`
-(e.g. `reusable-rockets-thesis.html`) as reference only. During setup (Q10b), the
-owner and agent choose whether and how to build a viewer for *their* lab.
+(e.g. `reusable-rockets-thesis.html`, `dashboard.html`) as reference only. **Default at
+setup:** agent builds `<lab>/dashboard/index.html` (Q10b `inline`) and updates it after
+every run. Owner may opt into `skip`, `guided`, or `both`.
+
+**Static-first:** one `index.html`, embedded data, opens via `file://` (Q10c). No dev server, `fetch()` to `runs/`, or npm unless the owner explicitly opts in.
 
 | Q10b choice | What the agent does |
 |-------------|---------------------|
@@ -1253,18 +1298,13 @@ owner and agent choose whether and how to build a viewer for *their* lab.
 | `both` | Inline viewer now + spec/guide for a richer viewer later |
 
 The viewer is a readability layer over run files. It does not execute autoresearch
-actions; the agent loop still writes files and reports in chat.
+actions; the agent loop still writes files and posts only the compact index in chat.
 
 ---
 
 ## 15A. Inline Viewer (when Q10b = `inline` or `both`)
 
-If the owner chose an inline viewer, the agent maintains a self-contained HTML file at
-`<lab>/dashboard/index.html`. **Design is the agent's choice** — layout, styling, and
-panels should fit the repo and enabled kinds. Use `examples/` as inspiration, not as
-a template to copy verbatim.
-
-**Update after:** each run and verdict change (while inline mode remains enabled).
+One self-contained `<lab>/dashboard/index.html` per Q10c; use `examples/` as inspiration only. Update after each run and verdict change.
 
 ### Suggested content
 
@@ -1277,10 +1317,8 @@ a template to copy verbatim.
 
 ### Build rules
 
-- Single `.html` file — no external dependencies (no CDN, no npm required)
-- Inline CSS and JS; embed run data directly (re-embed on each update)
-- Relative paths to run files so it opens locally (`open <lab>/dashboard/index.html`)
-- Clean and readable — agent picks dark or light; no lorem ipsum
+- One `.html`, inline CSS/JS, embedded run data (re-embed each update); `file://` safe — no CDN, npm, server, or `fetch()` to `runs/`
+- `static-simple`: table + links; `static-interactive`: search/sort/tabs in the same file
 
 ### Data sources
 
@@ -1303,6 +1341,7 @@ Reference demos: `examples/reusable-rockets-thesis.html`.
 ### Hard rules
 
 - **Do not generate frontend code unprompted** unless Q10b includes `inline`. For `guided` alone, deliver `<lab>/dashboard/SPEC.md` + `BUILD-GUIDE.md`.
+- **SPEC defaults to static HTML** unless the owner explicitly chose a server-backed stack.
 - **Do not pick a visual design** in guided mode — behavior, files, and workflow only.
 - **Actions are described, not implemented** in the UI — the agent loop still executes writes.
 
@@ -1384,7 +1423,7 @@ Deliverables:
 
 - [ ] Mode detected; `<lab>/` paths resolved (section 2)
 - [ ] Repo scan completed (section 3B)
-- [ ] Owner interviewed; `<lab>/config/setup.md` has `status: complete` (includes Q10b viewer choice)
+- [ ] Setup complete (`config/setup.md` with Q10b–c, Q11) and `config/styles/audience.md` exists
 - [ ] Gitignore preferences captured (Q9); `<lab>/.gitignore` generated
 - [ ] Lab scaffold exists under `<lab>/` (section 4)
 - [ ] `.gitignore` excludes runs and queue by default (or per owner overrides)
@@ -1392,7 +1431,7 @@ Deliverables:
 - [ ] Query and source seeds derived from focus topics
 - [ ] `<lab>/notes/autoresearch.md` created with setup status + enabled kinds
 - [ ] `<lab>/runs/autoresearch.jsonl` created (includes `setup_completed` event)
-- [ ] Viewer created **only if Q10b ≠ `skip`** (inline HTML and/or spec + guide)
+- [ ] Viewer created when Q10b ≠ `skip` (inline HTML and/or spec + guide, with Q10c style captured)
 - [ ] First run folder has all required artifacts
 - [ ] Per-run report posted in chat after run 001
 - [ ] No files outside `<lab>/` were modified (standalone: `start/` and `examples/` stay read-only)
@@ -1436,7 +1475,7 @@ Autoresearch is the lab. The main repo is production.
 | Which spec file? | `start/AUTORESEARCH-START.md` (standalone lab) or `autoresearch/AUTORESEARCH-START.md` (embedded) |
 | Where does everything go? | `<lab>/` only — repo root in standalone lab; `autoresearch/` in embedded mode |
 | Minimum per run? | manifest, hypotheses, notes, memo, score, verdict, jsonl entry, chat report |
-| Viewer? | Optional — per Q10b in setup; demos in `examples/` |
+| Viewer? | Static `dashboard/index.html` by default when enabled; demos in `examples/` |
 | Where is the viewer? | `<lab>/dashboard/` if enabled; otherwise read `runs/` directly |
 | When to write essay.md? | Strong signal + human-facing need (see setup output mode) |
 | Reverse press release? | Optional `## Reverse press release` in memo/essay when shippable; flag in manifest |

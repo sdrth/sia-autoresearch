@@ -29,7 +29,7 @@ Your AI agent runs **structured research loops**: generate hypotheses, search th
 Read and follow: start/AUTORESEARCH-START.md
 Then read: AGENTS.md for path rules and hard constraints.
 
-Start sia-autoresearch in this repo. Run the setup interview first (do not skip it), then loop 001. Use only my agent's default tools for web search. Keep all lab artifacts under the lab root; do not modify start/ or examples/ without asking me.
+Start sia-autoresearch in this repo. Run the setup interview first (do not skip it), then loop 001. Follow AGENTS.md (static viewer Q10c, audience Q11, compact chat reports). Use web search, in-repo scanning, and subagents when available. Keep all lab artifacts under the lab root; do not modify start/ or examples/ without asking me.
 ```
 
 **3.** Answer the setup interview when the agent asks — it will propose priorities, run kinds, and gitignore defaults. You confirm or edit. Then loop 001 begins.
@@ -64,7 +64,7 @@ https://raw.githubusercontent.com/sdrth/sia-autoresearch/main/start/AUTORESEARCH
 Then read agent instructions:
 https://raw.githubusercontent.com/sdrth/sia-autoresearch/main/AGENTS.md
 
-Start sia-autoresearch in this repo (embedded mode). Run the setup interview first (do not skip it), then loop 001. Bootstrap autoresearch/ if missing. Use only my agent's default tools for web search. All output under autoresearch/ only — never modify files outside it without my approval.
+Start sia-autoresearch in this repo (embedded mode). Run the setup interview first (do not skip it), then loop 001. Bootstrap autoresearch/ if missing. Follow AGENTS.md. Use web search, in-repo scanning, and subagents when available. All output under autoresearch/ only — never modify files outside it without my approval.
 ```
 
 Optional — want the spec checked into your repo? The agent can save a copy to `autoresearch/AUTORESEARCH-START.md` during bootstrap, or fetch it yourself:
@@ -121,7 +121,7 @@ sia-autoresearch has two layouts. Agents must detect which one applies before re
 | **Lab root `<lab>/`** | repo root | `autoresearch/` |
 | **Config** | `config/` | `autoresearch/config/` |
 | **Runs** | `runs/` | `autoresearch/runs/` |
-| **Viewer (optional)** | chosen at setup — see `examples/` for demos | chosen at setup |
+| **Viewer** | static `dashboard/index.html` by default at setup (Q10b/Q10c) | same under `autoresearch/` |
 | **Examples** | `examples/` (shipped demos, read-only) | n/a |
 
 ---
@@ -143,7 +143,7 @@ This repo uses sia-autoresearch. When asked to run research, discover product be
 1. Read and follow: `autoresearch/AUTORESEARCH-START.md`
 2. All output goes under `autoresearch/` only
 3. Never modify files outside `autoresearch/` without explicit human approval
-4. Viewer is optional — choose during setup (Q10b in the spec); see `examples/` for demo viewers
+4. Follow AGENTS.md — Q10c static viewer, Q11 audience, compact chat indexes
 
 Full spec: https://github.com/sdrth/sia-autoresearch
 ```
@@ -162,7 +162,7 @@ alwaysApply: false
 When asked to run sia-autoresearch, do research, generate product bets, or explore strategy:
 1. Detect mode (section 2 of the spec): standalone lab uses `start/AUTORESEARCH-START.md` + repo-root paths; embedded uses `autoresearch/AUTORESEARCH-START.md`
 2. Create and edit only under `<lab>/` — in standalone lab, `<lab>/` is repo root and `start/` + `examples/` are read-only
-3. Viewer is optional — follow Q10b in the spec; use `examples/` as reference demos, not a prescribed dashboard
+3. Follow AGENTS.md — Q10c viewer, Q11 language, compact chat indexes
 
 Spec + source: https://github.com/sdrth/sia-autoresearch
 
@@ -181,7 +181,7 @@ After bootstrap, the lab produces these artifacts under `<lab>/`:
 | Config | `config/` | `autoresearch/config/` | Priorities, query seeds, source seeds |
 | Living memory | `notes/autoresearch.md` | `autoresearch/notes/autoresearch.md` | Compounds across runs |
 | Runs | `runs/` | `autoresearch/runs/` | One folder per loop — hypotheses, notes, memo, bets, verdict |
-| Viewer (optional) | per Q10b | per Q10b | Your agent chooses: inline HTML, spec + build guide, or skip — see `examples/` for demos |
+| Viewer | static `dashboard/index.html` if enabled (Q10b/Q10c) | same under `autoresearch/` | Default is inline HTML; `guided` or `both` add spec + build guide; `skip` omits it |
 | Publishing queue | `publishing/` | `autoresearch/publishing/` | Human-reviewed drafts ready to promote |
 
 ---

@@ -32,7 +32,7 @@ This repo is a **standalone lab**. Detect mode before reading or writing paths:
 | **Lab root `<lab>/`** | repo root                                                    | `autoresearch/`                                      |
 | **Setup**             | `config/setup.md`                                            | `autoresearch/config/setup.md`                       |
 | **Runs**              | `runs/`                                                      | `autoresearch/runs/`                                 |
-| **Viewer**            | optional — chosen at setup (Q10b); see `examples/` for demos | optional — chosen at setup                           |
+| **Viewer**            | static `dashboard/index.html` at setup (Q10b–c)              | same under `autoresearch/`                           |
 
 
 In this repo, `start/` and `examples/` are shipped reference material — read-only unless the owner says otherwise. Demo viewers live in `examples/`.
@@ -60,18 +60,27 @@ In standalone mode, do not invent a parent repo; use `start/`, `examples/`, lab 
 - Resolve `<lab>/` from section 2 of the spec before creating files
 - Create and edit only under `<lab>/` — never modify files outside it without explicit human approval
 - In standalone lab mode, do not rewrite `start/`, `examples/`, or shipped public docs without approval
-- Viewer is optional — follow Q10b in the spec; use `examples/` as reference demos; let the owner and agent choose the design
+- **Viewer (Q10b–c):** static `dashboard/index.html` at setup unless `skip`; ask `static-simple` vs `static-interactive`; no server/npm unless owner opts in (see `examples/`)
+- **Language (Q11):** write `config/styles/audience.md`; plain chat/memos/viewer for non-technical owners — no agent jargon unless they use it first; keep evidence rigorous
+- Main chat is an index only — never paste full run artifacts (`memo.md`, `hypotheses.md`, `notes.md`, `bets.md`, `essay.md`, full `verdict.md`); write them under `<lab>/runs/<run-id>/` and point to paths (spec section 14)
+- Go deep on every run: multiple web-search branches, read-only in-repo scanning when context exists, and subagents for parallel branches when available — parent agent keeps final synthesis and score
 - Do not publish or promote outputs — that is a human decision
 - Search before synthesis: generate multiple hypotheses, test multiple query branches, and do not jump to the first plausible answer
 - Preserve proof of work: keep the exact queries run, linked sources, discarded branches, and why the kept thesis won
 - Score with restraint: most runs should not score above 0.80, and polished writing does not justify a high score by itself
-- If stronger models or subagents are available, use them deliberately for bounded research or validation work, but keep final judgment local
+- If stronger models or subagents are available, use them proactively each run (parallel search branches, independent validation of top hypotheses), but keep final judgment local
+
+## Run artifacts vs chat
+
+- **Durable outputs:** full research lives in `<lab>/runs/<run-id>/` and the viewer — not in chat
+- **After each run:** post only the compact block in spec section 14 (score, verdict, three one-line findings, paths); hypothesis counts in one line max
+- **Do not** dump memos, hypothesis tables, source lists, or long verdict prose in the main conversation
 
 ## Continuous mode
 
 When the user says "run N loops", "keep going", or "run continuously":
 
-- Complete each run, post a per-run summary in chat, then continue to the next
+- Complete each run, post the compact per-run index in chat (never full artifacts), then continue to the next
 - Stop if the user sends any message, or after 3 consecutive discard verdicts
 
 ## Quick agent prompt
@@ -87,14 +96,15 @@ Constraints:
 - Create and edit files ONLY under `<lab>/`
 - Do not modify start/, examples/, or other shipped public docs without approval
 - Use read-only access to repo docs/code for context
-- Use the agent's default search tools and optimize search queries as you learn
+- Use web search, in-repo read-only scanning, and subagents (when available) before synthesis — multiple branches every run
+- Read `config/styles/audience.md` (Q11)
 - Generate multiple hypotheses before writing the memo
-- Record proof of work in hypotheses.md, notes.md, and verdict.md
+- Record proof of work in hypotheses.md, notes.md, and verdict.md under the run folder
 - Score conservatively and explain why the result is not higher
-- If subagents or stronger models are available, use them for targeted validation or parallel research, not to outsource the final verdict
+- If subagents or stronger models are available, use them proactively for parallel research and validation, not to outsource the final verdict
 
 After this run:
-- Post the per-run report in chat (run id, kind, score, verdict, top 3 findings, hypotheses generated, hypotheses discarded, why the kept thesis won)
-- Update the viewer only if Q10b in setup enabled one (inline, guided, or both)
+- Post only the compact per-run index in chat (spec section 14) — no full memo, hypotheses, or verdict text
+- Update `<lab>/dashboard/index.html` when setup chose inline or both; otherwise update guided artifacts if applicable
 ```
 

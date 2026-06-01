@@ -18,9 +18,10 @@ When asked to run research, analyze the product, generate bets, explore strategy
 4. **Do not skip the startup interview** — if `<lab>/config/setup.md` is missing or not `status: complete`, run section 3 first
 5. **Search before synthesis** — generate multiple hypotheses, test multiple query branches, and do not jump to the first plausible answer
 6. **Preserve proof of work** — keep exact queries run, linked sources, discarded branches, and why the kept thesis won
-7. **Viewer is optional** — follow Q10b from setup; use `examples/` as demo reference; no committed dashboard in this repo
-8. **Security** — user's agent and tools only; default web search for external signals; no telemetry or sia-autoresearch API calls (spec section 2A)
-9. **After every run:** post a run summary in chat; update the viewer only if the owner enabled one
+7. **Viewer & language (Q10b–c, Q11)** — static `dashboard/index.html` unless `skip`; ask simple vs interactive; `audience.md` for plain non-technical copy
+8. **Go deep every run** — web search across branches, in-repo read-only scan when context exists, subagents when available; parent keeps final score
+9. **Security** — user's agent and tools only; default web search for external signals; no telemetry or sia-autoresearch API calls (spec section 2A)
+10. **After every run:** post only the compact per-run index in chat (below); full artifacts in `runs/` + viewer — never paste memo/hypotheses/verdict bodies
 
 ## Quick start prompt
 
@@ -28,21 +29,21 @@ When asked to run research, analyze the product, generate bets, explore strategy
 Read and follow: start/AUTORESEARCH-START.md
 ```
 
-## Per-run chat report (required)
+## Per-run chat index (required; not full artifacts)
 
-After every run, post this block:
+After every run, post only this block — details live in the run folder and viewer:
 
 ```
 ## Run complete: [run-id]
 **Kind:** [kind] | **Score:** [overall] | **Verdict:** [verdict]
 **Topic:** [topic]
-**Proof of work:** [hypotheses generated] generated | [hypotheses discarded] discarded
+**Proof:** [N] generated, [M] researched, [K] discarded — see `hypotheses.md`
 **Top findings:**
-1. [finding]
-2. [finding]
-3. [finding]
-**Why this won:** [one sentence]
-**Viewer:** [path if enabled, or "runs/ only"]
+1. [one line]
+2. [one line]
+3. [one line]
+**Run folder:** `<lab>/runs/[run-id]/`
+**Viewer:** `<lab>/dashboard/index.html` (or "runs/ only" if Q10b skip)
 ```
 
 Spec + source: https://github.com/sdrth/sia-autoresearch

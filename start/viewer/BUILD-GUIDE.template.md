@@ -25,7 +25,7 @@ Rules for the output:
 Implementation guide for the autoresearch viewer in this repo. Read **`{{lab}}/dashboard/SPEC.md`** first for panels, vocabulary, and actions — then use this doc to scaffold, wire data, and verify.
 
 **Lab root:** `{{lab}}/`
-**Viewer output:** `{{lab}}/dashboard/` (implementation lives here — Next app, Vite SPA, etc.)
+**Viewer:** static HTML at `{{lab}}/dashboard/` (`file://`; Q10c: `{{static-simple | static-interactive}}`)
 **Q10b choice:** `{{guided | both}}`
 **Enabled kinds:** {{comma-separated list from setup}}
 

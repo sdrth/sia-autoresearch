@@ -23,7 +23,7 @@ A **Notion-like viewer** for browsing research runs — **no server, no CDN, no 
 
 **Demo runs:** AR-001 (product-bets, example) and AR-002 (strategy)
 
-This is a **reference demo**. Your agent builds a viewer at `<lab>/dashboard/index.html` during setup (Q10b).
+Reference for Q10c `static-interactive` — lab viewer: `<lab>/dashboard/index.html` (static, no server).
 
 ---
 
