@@ -88,7 +88,8 @@ When asked to "run autoresearch" or "start autoresearch":
    the main repo (embedded mode) or explicitly promotes them (standalone mode).
 9. **Interview before first loop.** If `<lab>/config/setup.md` is missing or not
    `complete`, run the startup interview (section 3) before any research loop.
-   Do not guess priorities from the repo scan alone.
+   Ask setup interactively; use structured question tools (e.g. `AskQuestion`) when
+   available. Do not guess priorities from the repo scan alone.
 10. **Search before synthesis.** Generate multiple candidate hypotheses, query angles,
     and search branches before committing to a final memo. Do not lock onto the first
     plausible answer.
@@ -246,6 +247,10 @@ Present the repo snapshot, then ask the questions below. **Pre-fill a recommende
 answer for every question** based on the scan — same pattern as a decision sheet.
 The owner confirms, edits, or replaces each recommendation.
 
+Ask **interactively** (one or a few questions per turn, or via structured question
+tools such as `AskQuestion` when available). Do not post all questions in one message
+unless the owner wants a full decision sheet.
+
 Keep it to **6–8 questions** per session. Add 1–2 repo-type follow-ups from section
 3D when relevant.
 
@@ -344,7 +349,7 @@ Options:
 
 *Agent recommendation:* [pick one and say why — prefer `skip` when the owner will read runs in chat or markdown; prefer `inline` or `guided` when browsing history matters; cite `examples/` when showing what a viewer could look like]
 
-1. Post the repo snapshot + all questions with recommendations in **one message**.
+1. Post the repo snapshot, then ask Q1–Q10b interactively (see above).
 2. Ask the owner to reply inline (e.g. `Q2: …`, `Q4: …`) or say "accept all
    recommendations."
 3. Do **not** create run folders or query seeds until answers are captured.

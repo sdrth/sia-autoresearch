@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2026-06-01
+
+### Docs
+
+- `start/AUTORESEARCH-START.md`: setup interview should be interactive; use structured question tools (e.g. `AskQuestion`) when available instead of posting all questions in one message.
+
 ## v1 — 2026-05-31
 
 Initial public release of [sia-autoresearch](https://github.com/sdrth/sia-autoresearch).
