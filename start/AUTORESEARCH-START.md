@@ -1268,11 +1268,12 @@ a template to copy verbatim.
 
 ### Suggested content
 
-1. **Agent picks** — runs with score ≥ 0.80 or verdict `send_for_review`
-2. **All runs** — table: date, kind, title, score, verdict, links to run files
-3. **Living memory snapshot** — recent entries from `notes/autoresearch.md`
-4. **Activity log** — setup, run creation, verdict updates, review notes
-5. **Proof of work** — hypothesis counts and why the winning thesis won (on run detail)
+1. **Latest run summary** — current thesis, recommendation, score, and why it won
+2. **Agent picks** — runs with score ≥ 0.80 or verdict `send_for_review`
+3. **All runs** — table: date, kind, title, score, verdict, links to run files
+4. **Living memory snapshot** — recent entries from `notes/autoresearch.md`
+5. **Activity log** — setup, run creation, verdict updates, review notes
+6. **Proof of work** — hypothesis counts and why the winning thesis won (on run detail)
 
 ### Build rules
 

@@ -5,6 +5,7 @@
 ### Docs
 
 - `start/AUTORESEARCH-START.md`: setup interview should be interactive; use structured question tools (e.g. `AskQuestion`) when available instead of posting all questions in one message.
+- `start/AUTORESEARCH-START.md`: inline viewer should foreground the latest run summary first, then agent picks, all runs, memory, activity, and proof of work.
 
 ## v1 — 2026-05-31
 
