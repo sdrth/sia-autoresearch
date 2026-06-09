@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/sdrth/sia-autoresearch/main/start/schemas/manifest.schema.json",
+  "title": "sia-autoresearch run manifest",
+  "description": "Contract for runs/<run-id>/manifest.json. Agents should self-validate against this before finishing a run. No tooling required — read and compare.",
+  "type": "object",
+  "required": [
+    "id",
+    "kind",
+    "title",
+    "topic",
+    "verdict",
+    "hypothesisCounts",
+    "selectedQueries",
+    "selectedSources",
+    "scores",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Run id matching the folder name: YYYY-MM-DD-<kind>-NNN",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}-[a-z-]+-\\d{3}$"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "product-bets",
+        "strategy",
+        "code-research",
+        "growth",
+        "competitive-intel",
+        "founder-writing"
+      ]
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "topic": {
+      "type": "string",
+      "minLength": 1,
+      "description": "One sharp question, not a laundry list"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["discard", "draft", "keep", "send_for_review"]
+    },
+    "hypothesisCounts": {
+      "type": "object",
+      "required": ["generated", "researched", "discarded", "kept"],
+      "properties": {
+        "generated": { "type": "integer", "minimum": 0 },
+        "researched": { "type": "integer", "minimum": 0 },
+        "discarded": { "type": "integer", "minimum": 0 },
+        "kept": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "selectedQueries": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "The exact queries actually run — proof of work, not a wishlist"
+    },
+    "selectedSources": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Human-readable source names; clickable links live in notes.md"
+    },
+    "scores": { "$ref": "score.schema.json" },
+    "adversarial": {
+      "type": "object",
+      "description": "Adversarial pass record (spec sections 8-9). Required on substantial runs under spec >= 1.2.0; optional in this schema so pre-1.2.0 runs stay valid. A missing or unperformed pass caps overall score below 0.70.",
+      "required": ["performed"],
+      "properties": {
+        "performed": { "type": "boolean" },
+        "counterQueries": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Counter-evidence queries actually run — proof of attack, mirrored from adversarial.md"
+        },
+        "thesisRevised": {
+          "type": "boolean",
+          "description": "True when the attack changed memo.md before scoring"
+        },
+        "summary": {
+          "type": "string",
+          "description": "One line: what attacked the thesis and what survived"
+        }
+      },
+      "additionalProperties": true
+    },
+    "claimsDelta": {
+      "type": "object",
+      "description": "Changes this run made to the claims ledger (notes/claims.json, spec section 10). Optional for pre-1.2.0 runs.",
+      "properties": {
+        "added": { "type": "integer", "minimum": 0 },
+        "confirmed": { "type": "integer", "minimum": 0 },
+        "revised": { "type": "integer", "minimum": 0 },
+        "contradicted": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "publishingFile": {
+      "type": ["string", "null"],
+      "description": "Path under publishing/queue/ when verdict is send_for_review; otherwise null"
+    },
+    "outputs": {
+      "type": "object",
+      "properties": {
+        "reversePressRelease": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "specVersion": {
+      "type": "string",
+      "description": "Optional: spec version the run was produced under (e.g. 1.2.0)"
+    },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": true
+}

@@ -1,5 +1,7 @@
 # sia-autoresearch — Portable Start Guide
 
+**Spec version:** 1.2.0
+
 **Purpose:** One file an agent can follow to stand up and run sia-autoresearch as a
 **standalone founder research system** or inside **any repo** for product, growth,
 strategy, competitive intel, founder writing, and code research without modifying
@@ -7,6 +9,14 @@ existing repo files or docs.
 
 **Mode:** Manual and file-based. No app, CLI, or automation required unless the repo
 owner explicitly asks for it later.
+
+**Condensed reference:** `start/QUICKLOOP.md` — the minimum viable loop in one short
+file. Read this full spec once per lab (setup, security, templates); use QUICKLOOP
+during runs when context is tight. This spec wins on any conflict.
+
+**Versioning:** Record this spec version in `<lab>/config/setup.md` at bootstrap
+(`specVersion` in the frontmatter). When fetching the spec from the web, prefer a
+tagged release over `main` so embedded labs know which rules they follow.
 
 ---
 
@@ -108,11 +118,25 @@ When asked to "run autoresearch" or "start autoresearch":
     `<lab>/runs/<run-id>/` and the viewer. Post a compact per-run block in chat (section
     14) — never paste full `memo.md`, `hypotheses.md`, `notes.md`, or long `verdict.md`
     prose into the main conversation.
-15. **Match Q11** — `config/styles/audience.md`; plain owner-facing text when not technical.
+15. **Mirror the owner's language (Q11).** Every owner-facing output — chat reports,
+    memos, bets, verdicts, viewer copy — uses the owner's own vocabulary and KPIs from
+    `config/styles/audience.md`. Tech terms for technical owners, marketing terms for
+    marketers, plain language for `general`. The loop must never sound foreign to its
+    own reader. When the owner's messages reveal new terms, append them to
+    `audience.md` vocabulary. Evidence and scoring stay rigorous regardless.
 16. **No bundled network services.** This spec does not ship telemetry, analytics, or
     sia-autoresearch-specific API calls. Use only the agent, tools, and MCP servers
     the owner already runs. Web research uses the agent's **default built-in search**
     — not a custom search backend from this repo.
+17. **Counter yourself before facing the owner.** Every substantial run includes a
+    mandatory adversarial pass (sections 8–9): attack the winning thesis with real
+    counter-evidence searches and record the attack in `adversarial.md` **before**
+    scoring. An unattacked thesis caps `overall` below 0.70.
+18. **Read learning memory before researching; write it back after.** Every run reads
+    `notes/claims.json`, `notes/hypothesis-index.md`, and the kind's playbook before
+    generating hypotheses, searches the `config/sources/sources.json` registry before
+    the open web, and writes back claim deltas, discarded theses, and new sources at
+    the end (sections 9–10A). A run that changes no memory must say why.
 
 ---
 
@@ -357,8 +381,36 @@ Options:
 **Q10c. Viewer experience** *(if Q10b ≠ `skip` — ask)*  
 Simple static (`static-simple`: list + links) or static interactive (`static-interactive`: search/tabs; see `examples/dashboard.html`). One HTML file, `file://`, no server/npm. No Next/Vite/Express unless the owner explicitly opts in.
 
-**Q11. Reader & language** *(every setup)*  
-`technical` | `general` (default if unsure) | `mixed`. Write `config/styles/audience.md`. For `general`/`mixed`: plain chat, memos, and viewer; no agent jargon unless the owner uses it; keep evidence and scores rigorous.
+**Q10d. Local app viewer** *(mention in one line only — never push)*  
+**Default: no.** The lab is filesystem + static HTML viewers only — no app, no server,
+no npm. If — and only if — the owner explicitly asks for a richer local app (now or
+later), follow `start/viewer/APP-GUIDE.template.md` (section 15C). Do not offer this
+proactively beyond a single line, and never build it without an explicit yes.
+
+**Q11. Reader profile — role, language, KPIs** *(every setup)*  
+Build a precise picture of who reads the outputs, so the loop never sounds foreign
+to its own owner. Ask pragmatically (pre-fill recommendations from the scan **and
+from how the owner has written to you so far** — their messages are the best
+vocabulary sample you have):
+
+- **Role:** What do you do day to day? (founder, marketer, PM, engineer, designer,
+  sales, ops, …)
+- **Proficiency:** `technical` | `general` (default if unsure) | `mixed`
+- **Goals:** What decisions should these research loops actually help you make?
+- **KPIs:** Which 2–4 numbers do you track and care about? (e.g. MQLs, CAC,
+  conversion rate for a marketer; activation, churn, MRR for a founder; latency,
+  adoption, error rate for an engineer)
+
+Write all of it to `config/styles/audience.md`, including a starting **vocabulary**
+list of terms the owner actually used. Language rules that follow from it:
+
+- **Mirror the owner's language** in chat, memos, bets, verdicts, and viewer copy —
+  tech terms for technical owners, marketing terms for marketers, plain language
+  for `general`. Use *their* words for their domain, not synonyms.
+- **Frame findings against their KPIs** — a growth bet for a marketer talks CAC and
+  conversion, not "activation funnel topology."
+- No agent/research jargon unless the owner uses it first.
+- Keep evidence, sources, and scores rigorous regardless of language level.
 
 1. Post the repo snapshot, then ask Q1–Q11 interactively (see above).
 2. Ask the owner to reply inline (e.g. `Q2: …`, `Q4: …`) or say "accept all
@@ -389,6 +441,7 @@ After the owner responds, write `config/setup.md`:
 status: complete
 completedAt: 2026-05-31T12:00:00Z
 interviewedBy: agent-id
+specVersion: 1.2.0
 ---
 
 # Autoresearch Setup
@@ -442,15 +495,20 @@ interviewedBy: agent-id
 **Recommendation:** ...
 **Owner answer:** ...
 
-### Viewer (Q10b + Q10c)
+### Viewer (Q10b + Q10c + Q10d)
 
 - **Style (Q10b):** ...
 - **Experience (Q10c):** `static-simple` | `static-interactive` | ...
+- **Local app (Q10d):** `no` (default) | `yes — owner explicitly opted in`
 
 ### Audience (Q11)
 
+- **Role:** ...
 - **Level:** `technical` | `general` | `mixed`
 - **Primary reader:** ...
+- **Goals:** ...
+- **KPIs:** ...
+- **Vocabulary notes:** [terms observed in the owner's own messages]
 
 [Repeat for Q2–Q9 and any follow-ups]
 ```
@@ -459,14 +517,20 @@ Then **derive config from setup** (still only under `<lab>/`):
 
 - `<lab>/config/objective.md` ← Q1 + success criteria
 - `<lab>/config/queries/seeds.json` ← focus topics as initial seeds
-- `<lab>/config/sources/seeds.json` ← 5–10 sources relevant to focus topics (web search OK)
+- `<lab>/config/sources/sources.json` ← living source registry seeded with 5–10 sources relevant to focus topics (web search OK); schema: `start/schemas/sources.schema.json`
+- `<lab>/config/sources/README.md` ← short owner guide: how to add sources by hand (section 4)
 - `<lab>/config/styles/voice.md` ← only if output mode includes public drafts
-- `<lab>/config/styles/audience.md` ← Q11 language level and plain-language rules
+- `<lab>/config/styles/audience.md` ← Q11 role, proficiency, goals, KPIs, starting vocabulary, language rules, and learned-preferences section
 - `<lab>/notes/autoresearch.md` ← objective + enabled kinds + link to setup
+- `<lab>/notes/claims.json` ← empty claims ledger (section 10); schema: `start/schemas/claims.schema.json`
+- `<lab>/notes/hypothesis-index.md` ← empty index of tested-and-discarded theses (section 10)
+- `<lab>/notes/bets-ledger.md` ← empty bet outcome ledger (section 10)
+- `<lab>/notes/playbooks/` ← empty folder; per-kind playbooks accrete at meta-reviews (section 10)
 - `<lab>/.gitignore` ← generated from Q9 answers (section 5 defaults + owner overrides)
 - **Q10b `inline` or `both`:** `<lab>/dashboard/index.html` (static per Q10c; seed empty at setup)
 - **Q10b `guided` or `both`:** `<lab>/dashboard/SPEC.md` + `BUILD-GUIDE.md` (from `start/viewer/BUILD-GUIDE.template.md`)
 - **Q10b `skip`:** no viewer files
+- **Q10d `yes` (explicit owner opt-in only):** follow `start/viewer/APP-GUIDE.template.md` (section 15C); otherwise create nothing
 
 Append to `<lab>/runs/autoresearch.jsonl`:
 
@@ -513,12 +577,18 @@ When `start/AUTORESEARCH-START.md` exists, bootstrap at **repo root**:
 │   ├── setup.md
 │   ├── objective.md
 │   ├── queries/seeds.json
-│   ├── sources/seeds.json
+│   ├── sources/
+│   │   ├── sources.json     ← living source registry (owner-editable; agents grow it)
+│   │   └── README.md        ← how the owner adds sources by hand
 │   └── styles/
-│       ├── audience.md      ← Q11 language level (always at setup)
+│       ├── audience.md      ← Q11 reader profile + learned preferences (always at setup)
 │       └── voice.md         ← writing tone (if applicable)
 ├── notes/
-│   └── autoresearch.md
+│   ├── autoresearch.md      ← living memory narrative
+│   ├── claims.json          ← claims ledger: what the lab currently believes
+│   ├── hypothesis-index.md  ← tested-and-discarded theses (don't rediscover)
+│   ├── bets-ledger.md       ← falsifiable bets + resolution outcomes
+│   └── playbooks/           ← per-kind tactics that worked (meta-review only)
 ├── runs/
 │   └── autoresearch.jsonl
 ├── dashboard/                 ← optional; only if Q10b enables a viewer
@@ -543,12 +613,18 @@ autoresearch/
 │   ├── setup.md               ← interview record + owner priorities (required)
 │   ├── objective.md           ← what this lab optimizes for
 │   ├── queries/seeds.json     ← search query seeds + weights
-│   ├── sources/seeds.json     ← trusted source list
+│   ├── sources/
+│   │   ├── sources.json     ← living source registry (owner-editable; agents grow it)
+│   │   └── README.md        ← how the owner adds sources by hand
 │   └── styles/
-│       ├── audience.md      ← Q11 language level (always at setup)
+│       ├── audience.md      ← Q11 reader profile + learned preferences (always at setup)
 │       └── voice.md         ← writing tone (if applicable)
 ├── notes/
-│   └── autoresearch.md        ← living memory (create)
+│   ├── autoresearch.md        ← living memory narrative (create)
+│   ├── claims.json            ← claims ledger (create empty)
+│   ├── hypothesis-index.md    ← discarded-thesis index (create empty)
+│   ├── bets-ledger.md         ← bet outcome ledger (create empty)
+│   └── playbooks/             ← per-kind playbooks (create empty folder)
 ├── runs/
 │   └── autoresearch.jsonl     ← run event log (create empty)
 ├── dashboard/                 ← optional; only if Q10b enables a viewer
@@ -605,15 +681,81 @@ Turn external signals and repo context into actionable bets for [PRODUCT / CODEB
 }
 ```
 
-Bump `weight` (+0.05 to +0.15) when a query leads to a kept run; bump `failures` when
-a query produces discard-quality output.
+Update weights only by the explicit rule in section 10A (keep +0.05, discard −0.05,
+owner `acted_on` +0.10, `ignored` on a keep −0.05; retire below 0.70, cap at 1.50).
+Bump `successes`/`failures` counters as runs resolve.
 
-### `config/sources/seeds.json` (create — adapt)
+### `config/sources/sources.json` (create — living source registry)
+
+The registry replaces the old one-shot `sources/seeds.json`. It is a **living file**:
+the owner can add sources by hand at any time, and agents grow it every run when they
+find genuinely high-quality new sources. Schema: `start/schemas/sources.schema.json`
+(self-validate by reading it — no tooling required).
 
 ```json
-[
-  { "name": "Example Source", "category": "Strategy", "url": "https://example.com" }
-]
+{
+  "objective": "Trusted sources for this lab, weighted by how useful they have proven.",
+  "sources": [
+    {
+      "id": "src-001",
+      "name": "Example Industry Report",
+      "url": "https://example.com/report",
+      "type": "data",
+      "qualityTier": 1,
+      "topics": ["onboarding", "activation"],
+      "weight": 1.0,
+      "addedBy": "owner",
+      "dateAdded": "2026-05-31",
+      "lastUsed": null,
+      "timesUseful": 0,
+      "notes": "Primary benchmark data; prefer over secondhand summaries."
+    }
+  ]
+}
+```
+
+Field contract:
+
+- `id` — stable `src-NNN` id; cite it in `notes.md` so claims can chain to evidence
+- `type` — `primary` | `data` | `paper` | `docs` | `news` | `community` | `blog`
+- `qualityTier` — `1` (primary/authoritative) | `2` (strong secondary) | `3` (background)
+- `weight` — usefulness score updated only by the section 10A rule
+- `addedBy` — `owner` | `agent`; agent additions must include `notes` with provenance
+  (which run found it and why it earned a slot)
+
+Registry rules:
+
+- **Registry-first search:** before generic web search, check the registry for
+  tier-1/2 sources matching the topic and search those first (section 9).
+- **Grow it every run:** when research surfaces a genuinely strong new source, append
+  it with `addedBy: "agent"` — do not add SEO listicles or one-off links.
+- **Owner edits win:** never delete or down-tier an `addedBy: "owner"` entry; flag
+  disagreements in the meta-review instead.
+
+### `config/sources/README.md` (create — owner guide)
+
+```markdown
+# Sources — how to add your own
+
+`sources.json` is this lab's trusted source list. Agents check it before searching the
+open web, so adding a source here steers every future research loop.
+
+To add one, append an entry like this to the `sources` array (30 seconds, any editor):
+
+    {
+      "id": "src-NNN",          ← next free number
+      "name": "Readable name",
+      "url": "https://...",
+      "type": "primary | data | paper | docs | news | community | blog",
+      "qualityTier": 1,         ← 1 = authoritative, 2 = strong, 3 = background
+      "topics": ["topic"],
+      "weight": 1.0,            ← leave at 1.0; the lab adjusts it from results
+      "addedBy": "owner",
+      "dateAdded": "YYYY-MM-DD"
+    }
+
+Tip: tier-1 sources get searched first. The lab also adds sources it finds (marked
+`addedBy: "agent"`) — feel free to re-tier or remove those; your edits always win.
 ```
 
 ### `config/styles/voice.md` (create if writing runs matter)
@@ -629,13 +771,49 @@ a query produces discard-quality output.
 
 ### `config/styles/audience.md` (create at setup — from Q11)
 
+This file is the language contract for every owner-facing output (chat reports,
+memos, bets, verdicts, viewer copy). It is **living**: when the owner's messages
+reveal new terms or KPIs, update the vocabulary here — do not wait for a re-setup.
+
 ```markdown
 # Audience
 
+- Role: [what the owner does — e.g. growth marketer, technical founder, PM]
 - Level: general | technical | mixed
-- Primary reader: [who reads outputs]
-- Rules: plain owner-facing text for general/mixed; mirror owner's terms; rigorous on evidence
+- Primary reader: [who reads outputs, if not the owner]
+- Goals: [decisions the outputs should serve, in the owner's words]
+- KPIs: [the 2–4 metrics they track — e.g. CAC, MQLs / activation, MRR / latency, adoption]
+
+## Vocabulary (mirror these)
+
+- [terms the owner actually uses — seed from setup answers and chat; append as observed]
+
+## Avoid
+
+- [jargon the owner never uses — agent/research jargon by default; opposing-discipline
+  jargon (e.g. no infra terms for a marketer, no funnel acronyms for a backend engineer
+  unless they use them)]
+
+## Rules
+
+- Mirror the owner's language in all owner-facing text; use their words for their domain
+- Frame findings, bets, and verdicts against the KPIs above
+- Plain language for general/mixed; no unexplained acronyms the owner has not used
+- Keep evidence, sources, and scores rigorous regardless of language level
+
+## Preferences (learned — update from owner_feedback events, section 10A)
+
+- Formats that get read: [memo-first | bets-first | short verdicts | essays — observed, not assumed]
+- Length tolerance: [short | medium | long]
+- Kinds acted on most: [from `acted_on` feedback; steer topics toward these]
+- Kinds consistently ignored: [candidates to deprioritize or reframe]
+- Last updated: [date — run id or meta-review that updated this]
 ```
+
+This file starts as a vocabulary contract and **becomes a preference profile**: every
+`owner_feedback` event (section 10A) that reveals what the owner reads, acts on, or
+ignores should update the `## Preferences` section. The lab converges on what the
+owner actually uses — revealed preference beats the setup interview.
 
 ---
 
@@ -716,6 +894,7 @@ runs/YYYY-MM-DD-<kind>-NNN/
 ├── hypotheses.md           ← candidate angles explored, ranking, rejected branches
 ├── notes.md                ← sources, links, raw observations
 ├── memo.md                 ← internal strategy / analysis memo
+├── adversarial.md          ← required: counter-evidence attack on the winning thesis
 ├── bets.md                 ← concrete bets or recommendations (if applicable)
 ├── essay.md                ← optional public draft (only if signal is strong)
 ├── score.json              ← numeric scores
@@ -723,13 +902,18 @@ runs/YYYY-MM-DD-<kind>-NNN/
 └── voice-observations.md   ← what worked or failed in tone (writing runs)
 ```
 
-Skip `essay.md` when the run is internal-only or signal is weak.
+Skip `essay.md` when the run is internal-only or signal is weak. `adversarial.md` is
+**required on every substantial run** — the thesis must survive a genuine attack
+before it reaches the owner (sections 8 and 9).
 
 ---
 
 ## 8. Artifact Templates
 
 ### `manifest.json`
+
+JSON Schema: `start/schemas/manifest.schema.json` — self-validate the structure
+against it before finishing a run (read it; no tooling required).
 
 ```json
 {
@@ -754,10 +938,23 @@ Skip `essay.md` when the run is internal-only or signal is weak.
     "clarity": 0.0,
     "overall": 0.0
   },
+  "adversarial": {
+    "performed": true,
+    "counterQueries": ["counter query one", "counter query two"],
+    "thesisRevised": false,
+    "summary": "One line: what attacked the thesis and what survived"
+  },
+  "claimsDelta": {
+    "added": 0,
+    "confirmed": 0,
+    "revised": 0,
+    "contradicted": 0
+  },
   "publishingFile": null,
   "outputs": {
     "reversePressRelease": false
   },
+  "specVersion": "1.2.0",
   "createdAt": "2026-05-31T12:00:00Z",
   "updatedAt": "2026-05-31T12:00:00Z"
 }
@@ -821,7 +1018,61 @@ candidate angle, supporting signal, reason discarded or advanced.
   - hypothesis y — reason
 ```
 
+### `adversarial.md` (required on every substantial run)
+
+The adversarial pass is a **contract, not a courtesy**: after the winning thesis
+emerges and **before scoring**, the agent (or a dedicated subagent when available)
+must attack its own thesis — strongest counter-arguments, at least **2 genuine
+counter-evidence search branches**, and a steelman of the opposing view. A thesis
+that has survived a real attack is categorically more trustworthy than a
+first-plausible answer. Record the attack honestly; a revised or killed thesis is a
+*good* outcome, not a failure.
+
+```markdown
+# Adversarial Pass
+
+## Thesis under attack
+
+[The winning thesis, verbatim from memo.md at the time of the attack]
+
+## Attack vectors
+
+1. [Strongest counter-argument — what would have to be true for the thesis to be wrong]
+2. [Second vector — alternative explanation, conflicting incentive, stale data, etc.]
+
+## Steelman of the opposing view
+
+[The best honest case against the thesis, written as if you believed it]
+
+## Counter-evidence queries run
+
+- counter query one
+- counter query two
+
+## Evidence found
+
+- [What the counter-search actually surfaced — link sources in notes.md]
+
+## Outcome
+
+- **Survived intact** | **Revised** | **Killed**
+- What survived and why:
+- What was revised (and how memo.md changed):
+- Score / verdict impact: [e.g. evidenceQuality lowered 0.05; verdict moved keep → draft]
+```
+
+Rules:
+
+- Run the counter-queries for real and keep them — they count as proof of work and are
+  mirrored in `manifest.json` → `adversarial.counterQueries`.
+- If the attack revises the thesis, update `memo.md` **before** writing `bets.md` and
+  scoring; set `adversarial.thesisRevised` to `true`.
+- A pass with zero genuine counter-evidence searched does not count as performed
+  (hard downgrade trigger below).
+
 ### `score.json`
+
+JSON Schema: `start/schemas/score.schema.json`.
 
 Use 0.00–1.00 for each dimension. **Overall** is your honest rollup, not a math
 formula agents must share.
@@ -851,18 +1102,43 @@ Scoring discipline:
 - Good writing does **not** justify a high score by itself.
 - Clarity cannot compensate for weak evidence, obvious conclusions, or low leverage.
 - Reward signal, not effort. A long run can still deserve a low score.
+- **Bet hit rate is a scoring input** (section 10A): if the bets-ledger shows past
+  high-scored runs keep resolving `wrong`, score current runs lower until the lab's
+  judgment earns the range back. A 0.78 that is right 40% of the time was not a 0.78.
 
 Hard downgrade triggers:
 
 - fewer than 3 materially distinct hypotheses explored
 - fewer than 3 strong linked sources used for the final recommendation
 - no meaningful discarded branch with a stated reason
+- **no adversarial pass, or a pass with zero genuine counter-evidence searched**
+  (`adversarial.md` missing, or `counterQueries` empty / not actually run)
 - recommendation is not falsifiable, testable, or implementable
 - thesis is obvious or derivative relative to the topic
 - citations are weak, missing, or disconnected from the core claim
 
 If any hard downgrade trigger applies, the run should usually score below `0.70`
-unless there is a strong written reason in `verdict.md`.
+unless there is a strong written reason in `verdict.md`. The adversarial trigger has
+**no override**: a thesis that was never attacked caps `overall` below `0.70`.
+
+Calibration anchors (shipped in `examples/runs/`):
+
+- `2026-05-30-product-bets-001` — **0.76, keep**: actionable, multi-source, but
+  moderate novelty and no product-specific data. This is what a *good normal run*
+  looks like — note that it still does not reach 0.80.
+- `2026-06-03-competitive-intel-003` — **0.38, discard**: real searching happened,
+  but the thesis stayed obvious and under-evidenced. The verdict explains the
+  discard cheaply instead of dressing the run up. Discarding is a valid outcome.
+
+Local calibration anchors (after ~10 runs): at meta-review, promote this lab's own
+best `keep` and clearest `discard` as additional anchors in `notes/autoresearch.md`
+(`## Local calibration anchors`). Over time the lab calibrates against its own
+history, not just factory examples.
+
+Calibration self-audit (every 10 runs): blind re-score 2 random past runs **without
+looking at the original scores**, then compare. If average drift exceeds `0.05`,
+write a dated recalibration note in `notes/autoresearch.md` and score the next runs
+against the stricter of the two readings. Score drift is silent — this is the alarm.
 
 ### `verdict.md`
 
@@ -1038,41 +1314,77 @@ _Optional. Use when the essay implies something launchable; skip for pure though
 
 ## 9. Single-Run Workflow
 
+**Once per session, before the first run:** the owner feedback ritual (section 10A) —
+if previous `keep` / `send_for_review` runs have no recorded reaction yet, ask **one
+line** ("Did you act on [run]?") and log an `owner_feedback` event. Never more than
+one question per session; skip silently if there is nothing to ask about.
+
 Execute in order:
 
 1. **Pick kind + topic** — one sharp question, not a laundry list.
-2. **Generate hypotheses** — produce multiple candidate angles before deep research.
+2. **Read learning memory first** — before any new research:
+   - `notes/claims.json` — list claims relevant to the topic; treat them as priors to
+     confirm or challenge, not facts to restate
+   - `notes/hypothesis-index.md` — do **not** re-research a discarded thesis unless
+     its stated revisit trigger has fired
+   - `notes/playbooks/<kind>.md` — apply tactics that already worked for this owner
+3. **Generate hypotheses** — produce multiple candidate angles before deep research.
    Target at least 5 candidates for normal runs and more when the topic is broad.
    Do not jump from the first idea straight into the memo.
-3. **Optimize search branches** — self-improve the keywords, synonyms, and framing for
-   each candidate using `config/queries/seeds.json` as a starting point, not a limit.
-4. **Research deeply** — run live web searches across multiple branches; scan the repo
+4. **Optimize search branches — registry first.** Check
+   `config/sources/sources.json` for tier-1/2 sources matching the topic and search
+   those before the open web. Then self-improve the keywords, synonyms, and framing
+   for each candidate using `config/queries/seeds.json` as a starting point, not a limit.
+5. **Research deeply** — run live web searches across multiple branches; scan the repo
    read-only when embedded or when local context exists; delegate distinct branches to
    subagents when available. Preserve the exact queries you actually used.
-5. **Write `hypotheses.md`** — capture generated candidates, shortlisted branches,
+6. **Write `hypotheses.md`** — capture generated candidates, shortlisted branches,
    discarded branches, and why the winner advanced.
-6. **Write `notes.md`** — links first, then query evolution, then observations.
-7. **Write `memo.md`** — internal truth document; add `## Reverse press release` when
+7. **Write `notes.md`** — links first, then query evolution, then observations. Cite
+   registry ids (`src-NNN`) for sources that came from or enter the registry.
+8. **Write `memo.md`** — internal truth document; add `## Reverse press release` when
    the run implies a shippable wedge (section 8).
-8. **Write `bets.md`** — if kind is product, strategy, code, or growth.
-9. **Write `essay.md`** — only if public draft is warranted; optional reverse press
+9. **Adversarial pass (required)** — attack the winning thesis before anything
+   user-facing is finalized: strongest counter-arguments, at least 2 genuine
+   counter-evidence search branches, steelman of the opposing view. Write
+   `adversarial.md` (section 8). If the thesis is revised or killed, update `memo.md`
+   and `hypotheses.md` **now**, before bets and scoring. Delegate the attack to a
+   subagent when available — a fresh adversary is more honest than self-review.
+10. **Write `bets.md`** — if kind is product, strategy, code, or growth. Append each
+   bet as one line to `notes/bets-ledger.md` with a concrete check-by date (section 10).
+11. **Write `essay.md`** — only if public draft is warranted; optional reverse press
    release at end when launch-adjacent.
-10. **Set output signals** — `manifest.json` → `outputs.reversePressRelease` when
-   either file includes that section.
-11. **Score** — fill `score.json` and mirror scores in `manifest.json`.
-12. **Compare before finalizing** — check the winning thesis against the strongest
-    discarded branch. If the gap is small, prefer `draft` or `keep` over inflated
-    scores or premature review.
-13. **Verdict** — `verdict.md` with honest status, proof-of-work counts, and why the
+12. **Set output signals** — `manifest.json` → `outputs.reversePressRelease` when
+   either file includes that section; fill `adversarial` and `claimsDelta` objects.
+13. **Score** — fill `score.json` and mirror scores in `manifest.json`. Remember: a
+   thesis that was never genuinely attacked caps below 0.70 (section 8).
+14. **Compare before finalizing** — check the winning thesis against the strongest
+    discarded branch *and* the adversarial outcome. If the gap is small, prefer
+    `draft` or `keep` over inflated scores or premature review.
+15. **Verdict** — `verdict.md` with honest status, proof-of-work counts, and why the
     score is not higher.
-14. **Log** — append JSON line to `runs/autoresearch.jsonl`.
-15. **Memory** — add a one-line entry to `notes/autoresearch.md`; note `[+RPR]` when
+16. **Write back learning memory** — the run is not finished until memory changed:
+    - `notes/claims.json` — add new claims; mark confirmed / revised / contradicted
+      priors (with the contradicting evidence linked); mirror counts in
+      `manifest.json` → `claimsDelta`
+    - `notes/hypothesis-index.md` — one line per newly tested-and-discarded thesis,
+      with the reason and a revisit trigger if discarded on temporary grounds
+    - `config/sources/sources.json` — append genuinely strong new sources
+      (`addedBy: "agent"` + provenance); update `lastUsed` / `timesUseful` for
+      registry sources cited this run
+17. **Log** — append JSON line to `runs/autoresearch.jsonl`.
+18. **Memory** — add a one-line entry to `notes/autoresearch.md`; note `[+RPR]` when
     reverse press release is present.
-16. **Review file** — if `send_for_review`, create from publishing template (section 11);
+19. **Review file** — if `send_for_review`, create from publishing template (section 11);
     include reverse press release in draft body or link to memo section when relevant.
-17. **Viewer** — update `<lab>/dashboard/index.html` when enabled (Q10b/Q10c; default inline).
-18. **Report** — post only the compact per-run index in chat (section 14). Do not paste
-    run artifacts; hypothesis counts belong in one line with a pointer to `hypotheses.md`.
+20. **Viewer** — update `<lab>/dashboard/index.html` when enabled (Q10b/Q10c; default inline).
+21. **Report** — post only the compact per-run index in chat (section 14). Do not paste
+   run artifacts; hypothesis counts belong in one line with a pointer to `hypotheses.md`.
+
+**Language check (applies to steps 8–21):** before finishing, reread
+`config/styles/audience.md` and confirm the memo, bets, verdict, chat report, and
+viewer copy use the owner's vocabulary and KPIs — not research jargon. If the owner
+used new terms since the last run, append them to `audience.md` first.
 
 ### When stronger agents or subagents are available
 
@@ -1103,9 +1415,37 @@ Optional follow-up events:
 {"timestamp":"2026-05-31T13:00:00Z","event":"verdict_updated","runId":"2026-05-31-product-bets-001","verdict":"keep"}
 ```
 
+Learning-loop events (section 10A):
+
+```json
+{"timestamp":"2026-06-02T09:00:00Z","event":"owner_feedback","runId":"2026-05-31-product-bets-001","reaction":"acted_on","note":"shipped the activation metric bet"}
+{"timestamp":"2026-06-15T10:00:00Z","event":"bet_resolved","runId":"2026-05-31-product-bets-001","bet":"Bet 1: activation metric","resolution":"right","note":"trial-to-paid moved +4pts after first-value event shipped"}
+{"timestamp":"2026-06-15T10:30:00Z","event":"meta_review","runsCovered":5,"filesChanged":["config/queries/seeds.json","config/sources/sources.json","notes/bets-ledger.md","notes/playbooks/product-bets.md"],"betHitRate":0.67}
+```
+
+`reaction` values: `acted_on` | `ignored` | `disagreed` | `revisit`.
+`resolution` values: `right` | `wrong` | `unresolved`.
+The jsonl stays schema-less by design — these shapes are the contract in prose.
+
 ---
 
-## 10. Living Memory (`notes/autoresearch.md`)
+## 10. Living Memory (`notes/`)
+
+Memory is a **belief system, not a log**. It has four structured layers plus the
+human-readable narrative. Every run **reads** the layers relevant to its topic
+(section 9 step 2) and **writes back** what it learned (step 16). Run 40 should be
+visibly smarter than run 4 — if memory only accretes without changing behavior,
+this section is being done wrong.
+
+| File | What it holds | Read | Written |
+|------|---------------|------|---------|
+| `notes/autoresearch.md` | human-readable narrative + meta-reviews | every run | every run |
+| `notes/claims.json` | what the lab currently believes (claims ledger) | step 2 | step 16 |
+| `notes/hypothesis-index.md` | tested-and-discarded theses | step 2 | step 16 |
+| `notes/bets-ledger.md` | falsifiable bets + outcomes | meta-review | step 10 + meta-review |
+| `notes/playbooks/<kind>.md` | tactics that worked for this owner | step 2 | meta-review only |
+
+### `notes/autoresearch.md` (narrative)
 
 Create on first run; update after every run. Keep it scannable.
 
@@ -1130,10 +1470,193 @@ Create on first run; update after every run. Keep it scannable.
 
 - YYYY-MM-DD-kind-NNN: Title [verdict, overall score] [+RPR if reverse press release]
 
+## Local calibration anchors
+
+- Best keep so far: run-id (score) — why it earned it
+- Clearest discard: run-id (score) — why it was archived
+
 ## Review Queue Snapshot
 
 - Optional: list paths under publishing/queue/ awaiting human review
 ```
+
+### `notes/claims.json` (claims ledger)
+
+The structured truth underneath the narrative. One entry per **load-bearing belief**
+the lab holds — not every observation, only claims that future runs should treat as
+priors. Schema: `start/schemas/claims.schema.json`.
+
+```json
+{
+  "claims": [
+    {
+      "id": "clm-001",
+      "statement": "Activation speed, not pricing, is the primary trial-to-paid constraint for this product category.",
+      "confidence": 0.7,
+      "status": "active",
+      "sourceRun": "2026-05-30-product-bets-001",
+      "dateFormed": "2026-05-30",
+      "lastReviewed": "2026-05-30",
+      "reviewBy": "2026-08-30",
+      "supersededBy": null,
+      "evidence": ["src-001", "src-003"]
+    }
+  ]
+}
+```
+
+Ledger rules:
+
+- **Status lifecycle:** `active` → `revised` (statement updated, link `supersededBy`
+  to the new claim) | `contradicted` (counter-evidence won; keep the entry — knowing
+  what stopped being true is signal) | `expired` (past `reviewBy` and re-verification
+  failed or was skipped at meta-review).
+- **Read before research** (step 2): relevant `active` claims are priors. New runs
+  must confirm, revise, or contradict them explicitly — never silently re-derive or
+  silently ignore them.
+- **Write deltas after verdict** (step 16): mirror counts in `manifest.json` →
+  `claimsDelta`. A run that changes zero claims should say why in `verdict.md`.
+- **Staleness:** every claim gets a `reviewBy` date (default: 3 months out; shorter
+  for fast-moving topics). Runs flag stale claims they relied on; meta-reviews
+  re-verify or expire them.
+- `evidence` holds source-registry ids (`src-NNN`) — claim-level provenance chains
+  back through `config/sources/sources.json` to real links in run notes.
+
+### `notes/hypothesis-index.md` (don't rediscover)
+
+One line per tested-and-discarded thesis, appended at step 16. Step 2 of every loop
+checks it first: a dead thesis is only re-researched if its revisit trigger fired.
+
+```markdown
+# Hypothesis Index — tested and discarded
+
+| Date | Thesis (one line) | Run | Why discarded | Revisit trigger |
+|------|-------------------|-----|---------------|-----------------|
+| 2026-05-30 | Pricing friction is the primary trial drop-off cause | product-bets-001 | downstream of activation failure; weak evidence | activation fixed but conversion still flat |
+```
+
+### `notes/bets-ledger.md` (judgment, measured)
+
+Every bet written in any `bets.md` gets one line here at step 10, with a concrete
+check-by date. Meta-reviews resolve due bets (section 10A) — this ledger is the only
+mechanism that measures whether the lab's *judgment* (not its writing) is good.
+
+```markdown
+# Bets Ledger
+
+| Run | Bet (one line) | Logged | Check by | Status | Resolution note |
+|-----|----------------|--------|----------|--------|-----------------|
+| product-bets-001 | Defining one activation metric lifts trial-to-paid | 2026-05-30 | 2026-07-01 | open | — |
+
+## Hit rate
+
+- Resolved: 0 right / 0 wrong / 0 unresolved — hit rate: n/a
+```
+
+### `notes/playbooks/<kind>.md` (don't relearn)
+
+Per-kind tactics that demonstrably worked for **this owner**: query shapes that found
+signal, source types that held up, memo structures behind keeps, framings the owner
+acted on. Read at step 2 for every run of that kind.
+
+Rules: updated **only at meta-review** (never mid-run), capped at **~20 lines** per
+kind — it is a distillation, not a log. When adding a line would exceed the cap,
+delete the weakest line.
+
+### Meta-review (every 5 runs) — write-back, not commentary
+
+Living memory should compound, not just append. After every 5th run, run the
+meta-review as a **checklist with required file mutations** — a meta-review that
+changes no files is incomplete:
+
+1. **Resolve due bets** in `notes/bets-ledger.md` (`right` | `wrong` | `unresolved`)
+   via quick re-research; update the hit rate; log one `bet_resolved` jsonl event per
+   resolution. If the hit rate is poor for high-scored runs, say so — it lowers
+   future scores (section 8).
+2. **Apply weight updates** to `config/queries/seeds.json` and
+   `config/sources/sources.json` per the explicit rule in section 10A; retire seeds
+   and sources that fell below 0.70.
+3. **Expire or re-verify stale claims** in `notes/claims.json` (past `reviewBy`).
+4. **Refresh playbooks** in `notes/playbooks/<kind>.md` from the last 5 runs' keeps
+   and owner reactions (respect the 20-line cap).
+5. **Refresh local calibration anchors** in `notes/autoresearch.md` if a new best
+   keep or clearest discard emerged; every 10 runs, run the blind re-score
+   self-audit (section 8).
+6. **Write the dated `## Meta-review` section** in `notes/autoresearch.md` (5–8
+   bullets): repeating themes across keeps, dead seeds retired, scoring drift check,
+   what the owner acted on or ignored, one thing the next 5 runs do differently.
+7. **Log a `meta_review` jsonl event** listing the files actually changed.
+
+Keep the latest 2–3 meta-reviews; fold older ones into a single summary line.
+
+---
+
+## 10A. Self-Improvement Loops
+
+The lab learns by closing feedback loops: **every signal must change a file that the
+next run is required to read.** Recording without adaptation is the failure mode this
+section exists to prevent. All learning state lives in `config/` and `notes/`
+(lab-local, plain files, diffable) — shipped `start/` files are never edited at runtime.
+
+```
+run output → owner feedback ┐
+run output → bet outcomes   ├→ learning files (config/ + notes/) → next run reads them
+run output → seed hit rates ┘
+```
+
+### Owner feedback loop
+
+The owner's real reactions are the cheapest high-quality signal the lab can get.
+
+- **Event:** append to `runs/autoresearch.jsonl`:
+  `{"event":"owner_feedback","runId":"...","reaction":"acted_on | ignored | disagreed | revisit","note":"..."}`
+- **Ritual:** at the start of each session — before the first run — if previous
+  `keep` / `send_for_review` runs have no recorded reaction, ask **one line** ("Did
+  you act on [run title]?"). **Never more than one question per session**; the ritual
+  must stay cheaper than the signal it collects. Log whatever the owner answers, even
+  "ignored".
+- **Flows into:** seed/source weights (below) and the `## Preferences` section of
+  `config/styles/audience.md` — formats read, length tolerance, kinds acted on.
+  Revealed preference beats the setup interview.
+
+### Weight update rule (queries and sources)
+
+Applied at every meta-review — mechanical, no judgment calls:
+
+| Signal | Adjustment |
+|--------|------------|
+| Seed/source contributed to a `keep` run | +0.05 |
+| Seed/source contributed to a `discard` run | −0.05 |
+| Contributed to a run the owner marked `acted_on` | +0.10 |
+| Contributed to a `keep` the owner marked `ignored` | −0.05 |
+
+Bounds: retire below **0.70** (move seeds to a `retired` list; mark sources tier-3 or
+remove agent-added ones), cap at **1.50**. Step 4 of the loop searches high-weight
+entries first, so weights directly steer the next run's research.
+
+### Bet resolution (the strongest signal)
+
+Bets are falsifiable by contract — so check them. At every meta-review, resolve due
+bets in `notes/bets-ledger.md` via quick re-research, log `bet_resolved` events, and
+recompute the running hit rate. The hit rate is a **scoring input** (section 8): a
+lab whose 0.78-scored runs resolve `right` 40% of the time must score lower until its
+judgment earns the range back. This is the only mechanism that measures whether the
+lab's judgment — not its prose — is good.
+
+### Calibration self-audit
+
+Every 10 runs: blind re-score 2 random past runs without looking at the original
+scores (section 8). Plus local anchors: the lab's own best keep and clearest discard
+join the shipped `examples/runs/` anchors, so calibration tracks this lab's reality.
+
+### What self-learning never does
+
+- No runtime, cron, telemetry, or background process — learning happens whenever the
+  owner runs loops
+- No embedding stores or vector memory — flat files keep it portable and auditable
+- No agent edits to shipped `start/` files — learned state is lab-local
+- No score inflation from "the lab is learning" — improvement shows up as better
+  hit rates and sharper runs, not higher self-grades
 
 ---
 
@@ -1250,6 +1773,9 @@ hypotheses, notes, bets, essays, and verdict prose stay in the run folder and vi
 **Do not paste** `memo.md`, `hypotheses.md`, `notes.md`, `bets.md`, `essay.md`, or
 multi-paragraph `verdict.md` into the main conversation.
 
+Write the topic and findings lines in the **owner's vocabulary and against their
+KPIs** (`config/styles/audience.md`) — the report is for them, not for another agent.
+
 ```
 ## Run complete: [run-id]
 **Kind:** [kind] | **Score:** [overall] | **Verdict:** [verdict]
@@ -1288,7 +1814,17 @@ multi-paragraph `verdict.md` into the main conversation.
 setup:** agent builds `<lab>/dashboard/index.html` (Q10b `inline`) and updates it after
 every run. Owner may opt into `skip`, `guided`, or `both`.
 
-**Static-first:** one `index.html`, embedded data, opens via `file://` (Q10c). No dev server, `fetch()` to `runs/`, or npm unless the owner explicitly opts in.
+**The UI is strictly optional and owner-decided.** Three explicit tiers:
+
+| Tier | What it is | When |
+|------|-----------|------|
+| **Tier 0** | No viewer — read `runs/` directly + chat reports | Q10b `skip` |
+| **Tier 1** | Static `dashboard/index.html` — one file, embedded data, `file://` | **Default** (Q10b `inline`/`guided`/`both`) |
+| **Tier 2** | Local app (read-mostly, filesystem-backed) | **Only on explicit owner opt-in (Q10d)** — never proposed, never default |
+
+**Static-first:** one `index.html`, embedded data, opens via `file://` (Q10c). No dev
+server, `fetch()` to `runs/`, or npm unless the owner explicitly opts in via Q10d.
+The default lab is **filesystem + HTML viewers only** — no app, no server.
 
 | Q10b choice | What the agent does |
 |-------------|---------------------|
@@ -1296,6 +1832,7 @@ every run. Owner may opt into `skip`, `guided`, or `both`.
 | `inline` | Build/update `<lab>/dashboard/index.html` (section 15A) |
 | `guided` | Write `<lab>/dashboard/SPEC.md` + `BUILD-GUIDE.md` (section 15B) |
 | `both` | Inline viewer now + spec/guide for a richer viewer later |
+| Q10d `yes` (separate, explicit) | Follow `start/viewer/APP-GUIDE.template.md` (section 15C) |
 
 The viewer is a readability layer over run files. It does not execute autoresearch
 actions; the agent loop still writes files and posts only the compact index in chat.
@@ -1361,12 +1898,20 @@ The viewer is just a UI over the same files agents already maintain. No new sche
 
 | Surface | Read from | Notes |
 |---------|-----------|-------|
-| Run list | `runs/autoresearch.jsonl`, `runs/[run-id]/manifest.json` | append-only history and metadata |
-| Run detail | `runs/[run-id]/hypotheses.md`, `memo.md`, `notes.md`, `bets.md`, `essay.md`, `verdict.md` | single-run evidence, proof of work, and outputs |
+| Run list | `runs/autoresearch.jsonl`, `runs/[run-id]/manifest.json` | append-only history and metadata (manifest carries `adversarial` + `claimsDelta` on spec ≥ 1.2.0) |
+| Run detail | `runs/[run-id]/hypotheses.md`, `memo.md`, `adversarial.md`, `notes.md`, `bets.md`, `essay.md`, `verdict.md` | single-run evidence, proof of work, the adversarial pass, and outputs |
 | Agent picks | verdict `send_for_review`/`keep` or overall ≥ 0.80 | highlight high-signal runs |
-| Living memory | `notes/autoresearch.md` | rolling summary |
-| Activity log | `runs/autoresearch.jsonl`, `runs/[run-id]/verdict.md`, `notes/autoresearch.md` | show setup, iterations, feedback, and follow-up requests |
+| Living memory | `notes/autoresearch.md` | rolling summary + local calibration anchors |
+| Claims ledger *(1.2.0)* | `notes/claims.json` | what the lab believes, by status and confidence |
+| Bet hit-rate *(1.2.0)* | `notes/bets-ledger.md`, `bet_resolved` events | resolved/open bets and running hit rate — the lab's track record |
+| Source registry *(1.2.0)* | `config/sources/sources.json` | trusted sources by tier/topic/weight; read-only in the viewer |
+| Activity log | `runs/autoresearch.jsonl`, `runs/[run-id]/verdict.md`, `notes/autoresearch.md` | show setup, iterations, feedback (`owner_feedback`), bet resolutions, meta-reviews, and follow-up requests |
 | Action requests | repo-local workflow channel already used by the agent | the current agent/tooling performs the action in its next pass; the UI does not execute it |
+
+The 1.2.0 surfaces are optional — include them when the owner cares how the lab
+compounds; otherwise the run list + detail + memory remain the core. The viewer is a
+UI over files agents already maintain — it reads `claims.json` / `sources.json` (and
+validates them against the shipped schemas) but never writes them. No new schemas.
 
 If the repo has no established local request channel, keep the action surface informational only.
 
@@ -1375,6 +1920,32 @@ If the repo has no established local request channel, keep the action surface in
 After every run, update `<lab>/dashboard/SPEC.md` only if enabled kinds, vocabulary,
 actions, or activity-log shape changed. Regenerate `BUILD-GUIDE.md` only when the spec
 changes materially. For `inline`/`both`, update `index.html` after each run.
+
+---
+
+## 15C. Local App Viewer (Q10d — explicit opt-in only)
+
+**Never built by default.** This tier exists only when the owner explicitly asks for
+a richer local app — at setup (Q10d) or any time later. The agent must not propose
+it beyond the single Q10d line, must not scaffold it speculatively, and must not
+treat a static-viewer request as app consent.
+
+When the owner opts in, customize `start/viewer/APP-GUIDE.template.md` into
+`<lab>/dashboard/APP-GUIDE.md` and build from it. Hard boundaries (the guide expands
+on these):
+
+- **Local-first, read-mostly.** The app reads `runs/`, `notes/`, and `config/`
+  straight from the filesystem. No database, no backend service, no telemetry, no
+  network calls to render runs.
+- **The agent stays the only writer of research.** The app's single write path is
+  intent files under `<lab>/queue/` (promote / annotate / request-run) that the
+  agent consumes on its next pass. The app never writes run artifacts, scores,
+  claims, or registry entries.
+- **The file contracts are the API.** Same files the static viewer reads (section
+  15B) plus the learning files: `notes/claims.json`, `notes/bets-ledger.md`,
+  `config/sources/sources.json`. No new schemas.
+- **Removable without loss.** Deleting the app must lose nothing — all truth stays
+  in the lab files. If the app dies, Tier 1 and Tier 0 still work.
 
 ---
 
@@ -1404,12 +1975,15 @@ This run:
 
 Steps:
 1. Bootstrap `<lab>/` if missing (section 4)
-2. Research using web + repo context; record sources in notes.md
-3. Write memo.md and bets.md (or essay.md if founder-writing and signal supports it)
-4. Add ## Reverse press release to memo.md and/or essay.md when the run implies something shippable; set manifest outputs.reversePressRelease
-5. Score honestly; write verdict.md
-6. Append autoresearch.jsonl; update notes/autoresearch.md
-7. If overall ≥ 0.85 and a public draft exists, set verdict send_for_review and create publishing/queue file
+2. Read learning memory first: notes/claims.json (priors), notes/hypothesis-index.md (dead theses), notes/playbooks/<kind>.md (tactics)
+3. Research registry-first (config/sources/sources.json tier-1/2 before open web), then web + repo context; record sources in notes.md with src-NNN ids
+4. Write memo.md, then run the adversarial pass (required): attack the thesis, 2+ counter-evidence branches, write adversarial.md; revise memo if the attack lands
+5. Write bets.md (append each bet to notes/bets-ledger.md with a check-by date) or essay.md if founder-writing and signal supports it
+6. Add ## Reverse press release to memo.md and/or essay.md when the run implies something shippable; set manifest outputs.reversePressRelease
+7. Score honestly (no adversarial pass caps overall below 0.70); write verdict.md
+8. Write back memory: claim deltas to notes/claims.json, discarded theses to hypothesis-index.md, new sources to the registry
+9. Append autoresearch.jsonl; update notes/autoresearch.md
+10. If overall ≥ 0.85 and a public draft exists, set verdict send_for_review and create publishing/queue file
 
 Deliverables:
 - List the run folder path
@@ -1423,16 +1997,17 @@ Deliverables:
 
 - [ ] Mode detected; `<lab>/` paths resolved (section 2)
 - [ ] Repo scan completed (section 3B)
-- [ ] Setup complete (`config/setup.md` with Q10b–c, Q11) and `config/styles/audience.md` exists
+- [ ] Setup complete (`config/setup.md` with Q10b–c, Q11) and `config/styles/audience.md` exists with role, proficiency, goals, KPIs, and starting vocabulary
 - [ ] Gitignore preferences captured (Q9); `<lab>/.gitignore` generated
 - [ ] Lab scaffold exists under `<lab>/` (section 4)
 - [ ] `.gitignore` excludes runs and queue by default (or per owner overrides)
 - [ ] `<lab>/config/objective.md` reflects owner answers (not generic placeholders)
-- [ ] Query and source seeds derived from focus topics
+- [ ] Query seeds derived from focus topics; `config/sources/sources.json` registry seeded (5–10 entries) with owner `README.md`
+- [ ] Learning memory files created: `notes/claims.json`, `notes/hypothesis-index.md`, `notes/bets-ledger.md`, `notes/playbooks/`
 - [ ] `<lab>/notes/autoresearch.md` created with setup status + enabled kinds
 - [ ] `<lab>/runs/autoresearch.jsonl` created (includes `setup_completed` event)
-- [ ] Viewer created when Q10b ≠ `skip` (inline HTML and/or spec + guide, with Q10c style captured)
-- [ ] First run folder has all required artifacts
+- [ ] Viewer created when Q10b ≠ `skip` (inline HTML and/or spec + guide, with Q10c style captured); no app unless Q10d was an explicit yes
+- [ ] First run folder has all required artifacts (including `adversarial.md`)
 - [ ] Per-run report posted in chat after run 001
 - [ ] No files outside `<lab>/` were modified (standalone: `start/` and `examples/` stay read-only)
 
@@ -1460,7 +2035,20 @@ Autoresearch is the lab. The main repo is production.
 - Reverse press releases for vague strategy with no shippable wedge
 - Copy-pasting the same reverse press release block into memo and essay verbatim
 - Scoring every run ≥ 0.85 to feel productive
-- Building a CLI, custom app, or complex tooling before runs prove value
+- Skipping the adversarial pass, or writing a token `adversarial.md` with no real
+  counter-evidence search — an unattacked thesis is a first-plausible answer
+- Re-researching a thesis the hypothesis index already discarded, with no fired
+  revisit trigger
+- Restating ledger claims as fresh findings instead of confirming/revising them
+- Writing bets without appending them to `notes/bets-ledger.md` — unfalsified bets
+  teach the lab nothing
+- Meta-reviews that produce commentary but mutate no files
+- Asking the owner more than one feedback question per session
+- Reporting to a marketer in engineering jargon (or vice versa) — outputs that sound
+  foreign to their own reader, ignoring `config/styles/audience.md`
+- Treating Q11 as a one-time checkbox instead of updating vocabulary as the owner talks
+- Building a CLI, custom app, or complex tooling before runs prove value — and never
+  building the Q10d app without an explicit owner yes
 - Adding telemetry, analytics, or phone-home calls as part of default setup
 - Duplicating the entire repo into `internal-mirror/` without cause
 - Promoting bets that lack a concrete "build / test next" step
@@ -1474,13 +2062,17 @@ Autoresearch is the lab. The main repo is production.
 | First time in a repo? | Detect mode → repo scan → interview owner (sections 3B–3C) → `<lab>/config/setup.md` → then loop 001 |
 | Which spec file? | `start/AUTORESEARCH-START.md` (standalone lab) or `autoresearch/AUTORESEARCH-START.md` (embedded) |
 | Where does everything go? | `<lab>/` only — repo root in standalone lab; `autoresearch/` in embedded mode |
-| Minimum per run? | manifest, hypotheses, notes, memo, score, verdict, jsonl entry, chat report |
-| Viewer? | Static `dashboard/index.html` by default when enabled; demos in `examples/` |
+| Minimum per run? | manifest, hypotheses, notes, memo, adversarial, score, verdict, jsonl entry, memory write-back, chat report |
+| Viewer? | Static `dashboard/index.html` by default when enabled; demos in `examples/`; local app only via explicit Q10d opt-in (section 15C) |
 | Where is the viewer? | `<lab>/dashboard/` if enabled; otherwise read `runs/` directly |
 | When to write essay.md? | Strong signal + human-facing need (see setup output mode) |
 | Reverse press release? | Optional `## Reverse press release` in memo/essay when shippable; flag in manifest |
 | When to send_for_review? | Strong score + draft worth a human read |
-| How does memory compound? | `<lab>/notes/autoresearch.md` + query weight updates |
+| Adversarial pass? | Required before scoring — attack the thesis, 2+ counter-evidence branches, `adversarial.md`; skipping caps overall below 0.70 (sections 8–9) |
+| How does memory compound? | Claims ledger + hypothesis index + playbooks + bets ledger (section 10), written back every run; narrative in `notes/autoresearch.md` |
+| How does the lab learn? | Section 10A — owner feedback events, bet resolution + hit rate, weight update rules, write-back meta-reviews, calibration self-audit |
+| Where do trusted sources live? | `config/sources/sources.json` — owner-editable registry; agents search it first and grow it every run |
+| Whose language do outputs use? | The owner's — role, vocabulary, KPIs from `config/styles/audience.md` (Q11); mirror their terms, never sound foreign to them |
 | Security model? | User's agent + tools only; default web search; no repo telemetry — section 2A |
 | Can I touch app code? | Only when human explicitly promotes an output |
 | How do I run continuously? | User says "run N loops" or "keep going" — see section 14 |

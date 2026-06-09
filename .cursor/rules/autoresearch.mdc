@@ -18,7 +18,7 @@ When asked to run research, analyze the product, generate bets, explore strategy
 4. **Do not skip the startup interview** — if `<lab>/config/setup.md` is missing or not `status: complete`, run section 3 first
 5. **Search before synthesis** — generate multiple hypotheses, test multiple query branches, and do not jump to the first plausible answer
 6. **Preserve proof of work** — keep exact queries run, linked sources, discarded branches, and why the kept thesis won
-7. **Viewer & language (Q10b–c, Q11)** — static `dashboard/index.html` unless `skip`; ask simple vs interactive; `audience.md` for plain non-technical copy
+7. **Viewer & language (Q10b–c, Q11)** — static `dashboard/index.html` unless `skip`; ask simple vs interactive; `config/styles/audience.md` holds the owner's role, KPIs, and vocabulary — **mirror their language** in all owner-facing text (tech terms for technical owners, marketing terms for marketers); never sound foreign to the reader
 8. **Go deep every run** — web search across branches, in-repo read-only scan when context exists, subagents when available; parent keeps final score
 9. **Security** — user's agent and tools only; default web search for external signals; no telemetry or sia-autoresearch API calls (spec section 2A)
 10. **After every run:** post only the compact per-run index in chat (below); full artifacts in `runs/` + viewer — never paste memo/hypotheses/verdict bodies

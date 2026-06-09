@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/sdrth/sia-autoresearch/main/start/schemas/claims.schema.json",
+  "title": "sia-autoresearch claims ledger",
+  "description": "Contract for notes/claims.json — the structured beliefs of the lab. One entry per load-bearing claim, not per observation. Runs read relevant active claims as priors before researching (spec section 9 step 2) and write deltas after the verdict (step 16). Agents self-validate by reading this file — no tooling required.",
+  "type": "object",
+  "required": ["claims"],
+  "properties": {
+    "claims": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/claim" }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "claim": {
+      "type": "object",
+      "required": ["id", "statement", "confidence", "status", "sourceRun", "dateFormed"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable claim id: clm-NNN",
+          "pattern": "^clm-\\d{3,}$"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The belief, stated falsifiably — one sentence a future run can confirm or contradict"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "0.00-1.00 — honest, conservative; update when runs confirm or weaken the claim"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "revised", "contradicted", "expired"],
+          "description": "active = current prior; revised = superseded (link supersededBy); contradicted = counter-evidence won, keep the entry; expired = past reviewBy without re-verification"
+        },
+        "sourceRun": {
+          "type": "string",
+          "description": "Run id that formed the claim: YYYY-MM-DD-<kind>-NNN",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}-[a-z-]+-\\d{3}$"
+        },
+        "dateFormed": { "type": "string", "format": "date" },
+        "lastReviewed": {
+          "type": ["string", "null"],
+          "format": "date",
+          "description": "Last run or meta-review that confirmed, revised, or re-verified this claim"
+        },
+        "reviewBy": {
+          "type": ["string", "null"],
+          "format": "date",
+          "description": "Staleness date — default 3 months from dateFormed, shorter for fast-moving topics; meta-reviews re-verify or expire claims past this date"
+        },
+        "supersededBy": {
+          "type": ["string", "null"],
+          "description": "Claim id (clm-NNN) that replaces this one when status is revised"
+        },
+        "evidence": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^src-\\d{3,}$" },
+          "description": "Source-registry ids (config/sources/sources.json) backing this claim — claim-level provenance"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

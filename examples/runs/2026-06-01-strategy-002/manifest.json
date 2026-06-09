@@ -1,0 +1,57 @@
+{
+  "id": "2026-06-01-strategy-002",
+  "kind": "strategy",
+  "title": "Verticalize the wedge, not the product",
+  "topic": "Should an early-stage B2B workflow tool verticalize into one industry now, or stay horizontal until activation is fixed?",
+  "verdict": "keep",
+  "hypothesisCounts": {
+    "generated": 6,
+    "researched": 5,
+    "discarded": 3,
+    "kept": 1
+  },
+  "selectedQueries": [
+    "vertical SaaS vs horizontal SaaS early stage when to verticalize",
+    "vertical SaaS wedge go-to-market beachhead",
+    "horizontal SaaS verticalized marketing playbook",
+    "SaaS verticalization too early failure"
+  ],
+  "selectedSources": [
+    "Tidemark — Vertical SaaS Knowledge Project",
+    "a16z — vertical software market entry",
+    "Lenny's Newsletter — when to verticalize",
+    "First Round Review — finding your beachhead",
+    "Bessemer — State of the Cloud (vertical SaaS section)"
+  ],
+  "scores": {
+    "novelty": 0.60,
+    "actionability": 0.75,
+    "strategicLeverage": 0.80,
+    "evidenceQuality": 0.68,
+    "clarity": 0.76,
+    "overall": 0.72
+  },
+  "adversarial": {
+    "performed": true,
+    "counterQueries": [
+      "SaaS verticalization too early failure",
+      "vertical SaaS commit early before product-market fit outcomes",
+      "beachhead selection existing customer concentration bias"
+    ],
+    "thesisRevised": false,
+    "summary": "Attacked sequencing-as-stall and concentration-bias; thesis held, Bet 1 sharpened to segment activated users"
+  },
+  "claimsDelta": {
+    "added": 1,
+    "confirmed": 1,
+    "revised": 0,
+    "contradicted": 0
+  },
+  "publishingFile": null,
+  "outputs": {
+    "reversePressRelease": false
+  },
+  "specVersion": "1.2.0",
+  "createdAt": "2026-06-01T08:40:00Z",
+  "updatedAt": "2026-06-01T10:05:00Z"
+}

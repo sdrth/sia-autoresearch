@@ -1,0 +1,53 @@
+{
+  "id": "2026-06-03-competitive-intel-003",
+  "kind": "competitive-intel",
+  "title": "Onboarding-tool landscape scan (discarded — thesis stayed obvious)",
+  "topic": "Where is the whitespace in the user-onboarding tooling market that this product could occupy?",
+  "verdict": "discard",
+  "hypothesisCounts": {
+    "generated": 5,
+    "researched": 4,
+    "discarded": 4,
+    "kept": 0
+  },
+  "selectedQueries": [
+    "user onboarding software market landscape 2026",
+    "product tour tools comparison",
+    "onboarding tooling gaps mid-market SaaS"
+  ],
+  "selectedSources": [
+    "Vendor comparison listicles (low signal)",
+    "G2 — user onboarding category grid",
+    "Two vendor pricing pages"
+  ],
+  "scores": {
+    "novelty": 0.25,
+    "actionability": 0.35,
+    "strategicLeverage": 0.45,
+    "evidenceQuality": 0.35,
+    "clarity": 0.55,
+    "overall": 0.38
+  },
+  "adversarial": {
+    "performed": true,
+    "counterQueries": [
+      "multi-role B2B onboarding unmet need buyer complaints",
+      "mid-market CS onboarding workarounds community discussion"
+    ],
+    "thesisRevised": false,
+    "summary": "Steelmanned that whitespace exists; could not support it buyer-side, which reinforced the discard"
+  },
+  "claimsDelta": {
+    "added": 0,
+    "confirmed": 0,
+    "revised": 0,
+    "contradicted": 0
+  },
+  "publishingFile": null,
+  "outputs": {
+    "reversePressRelease": false
+  },
+  "specVersion": "1.2.0",
+  "createdAt": "2026-06-03T14:10:00Z",
+  "updatedAt": "2026-06-03T15:20:00Z"
+}

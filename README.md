@@ -8,7 +8,7 @@ Source: [github.com/sdrth/sia-autoresearch](https://github.com/sdrth/sia-autores
 
 ### What it does
 
-Your AI agent runs **structured research loops**: generate hypotheses, search the web, discard weak branches, write a memo and bets, score honestly, and log proof of work — while **you** distill what matters. One markdown spec drives everything. No new app, CLI, or telemetry.
+Your AI agent runs **structured research loops**: generate hypotheses, search the web, discard weak branches, write a memo and bets, **attack its own thesis with counter-evidence before you ever see it**, score honestly, and log proof of work — while **you** distill what matters. The lab **learns across runs**: a claims ledger of what it believes, a bet ledger that checks whether past calls were right, and a source registry you can grow by hand. One markdown spec drives everything. No new app, CLI, or telemetry.
 
 ### Who it's for
 
@@ -42,8 +42,10 @@ Point your agent at these files in order:
 |------|------|---------------------|
 | 1 | [`start/AUTORESEARCH-START.md`](start/AUTORESEARCH-START.md) | **Full spec** — setup interview, run kinds, artifacts, scoring, security, workflows |
 | 2 | [`AGENTS.md`](AGENTS.md) | **Agent entry** — path rules, hard constraints, quick prompt, continuous mode |
-| 3 | [`.cursor/rules/autoresearch.mdc`](.cursor/rules/autoresearch.mdc) | **Cursor rule** — copy into your repo or use as-is in this lab |
-| 4 | [`examples/`](examples/) | **Sample runs** — what a complete loop looks like before you run your own |
+| 3 | [`start/QUICKLOOP.md`](start/QUICKLOOP.md) | **Condensed loop reference** — the minimum viable loop in one short file; use during runs when context is tight |
+| 4 | [`start/schemas/`](start/schemas/) | **Artifact contracts** — JSON Schemas for `manifest.json`, `score.json`, `claims.json` (claims ledger), and `sources.json` (source registry); agents self-validate, no tooling needed |
+| 5 | [`.cursor/rules/autoresearch.mdc`](.cursor/rules/autoresearch.mdc) | **Cursor rule** — copy into your repo or use as-is in this lab |
+| 6 | [`examples/`](examples/) | **Sample runs** — a 0.76 keep, a 0.72 strategy keep, and a 0.38 **discard** that anchors conservative scoring |
 
 Raw spec URL (works from any repo — your agent can fetch it directly):
 
@@ -96,16 +98,18 @@ flowchart TD
     B --> C["Scan context"]
     C --> D["Startup interview"]
     D --> E["Set objective, run kinds, and focus topics"]
-    E --> F["Generate multiple hypotheses"]
-    F --> G["Run searches and optimize queries"]
+    E --> E2["Read learning memory: claims, dead theses, playbooks"]
+    E2 --> F["Generate multiple hypotheses"]
+    F --> G["Search trusted source registry first, then optimize web queries"]
     G --> H["Collect sources and notes"]
     H --> I["Discard weak branches"]
     I --> J["Pick strongest thesis"]
-    J --> K["Write memo, bets, verdict, and proof of work"]
-    K --> L["Update memory and run log"]
+    J --> J2["Adversarial pass: attack the thesis with counter-evidence"]
+    J2 --> K["Write memo, bets, verdict, and proof of work"]
+    K --> L["Write back memory: claims, bet ledger, sources, run log"]
     L --> M["Update viewer if enabled, report to user"]
     M --> N{"Run another loop?"}
-    N -->|Yes| F
+    N -->|Yes| E2
     N -->|No| O["Human reviews and distills"]
 ```
 
@@ -178,10 +182,11 @@ After bootstrap, the lab produces these artifacts under `<lab>/`:
 | Artifact | Standalone lab path | Embedded path | Description |
 |----------|---------------------|---------------|-------------|
 | Starter spec | `start/AUTORESEARCH-START.md` | `autoresearch/AUTORESEARCH-START.md` | Full agent instructions |
-| Config | `config/` | `autoresearch/config/` | Priorities, query seeds, source seeds |
-| Living memory | `notes/autoresearch.md` | `autoresearch/notes/autoresearch.md` | Compounds across runs |
-| Runs | `runs/` | `autoresearch/runs/` | One folder per loop — hypotheses, notes, memo, bets, verdict |
-| Viewer | static `dashboard/index.html` if enabled (Q10b/Q10c) | same under `autoresearch/` | Default is inline HTML; `guided` or `both` add spec + build guide; `skip` omits it |
+| Config | `config/` | `autoresearch/config/` | Priorities, query seeds, audience profile |
+| Source registry | `config/sources/sources.json` | `autoresearch/config/sources/sources.json` | **Your trusted source list** — edit it by hand anytime; agents search it first and grow it every run |
+| Living memory | `notes/` | `autoresearch/notes/` | Compounds across runs: narrative, claims ledger, hypothesis index, bets ledger, per-kind playbooks |
+| Runs | `runs/` | `autoresearch/runs/` | One folder per loop — hypotheses, notes, memo, **adversarial pass**, bets, verdict |
+| Viewer | static `dashboard/index.html` if enabled (Q10b/Q10c) | same under `autoresearch/` | Default is inline HTML; `guided` or `both` add spec + build guide; `skip` omits it. **A local app exists only if you explicitly opt in (Q10d)** — default is filesystem + HTML, no server |
 | Publishing queue | `publishing/` | `autoresearch/publishing/` | Human-reviewed drafts ready to promote |
 
 ---
@@ -262,6 +267,10 @@ sia-autoresearch is **spec-first**: markdown instructions and local files. It is
 
 See [`examples/`](examples/) for sample runs and **demo viewers**:
 
+- [`runs/2026-05-30-product-bets-001/`](examples/runs/2026-05-30-product-bets-001/) — a good normal run (0.76, `keep`): multi-source, actionable, honest about what's missing — includes an `adversarial.md` where the thesis survives a real counter-evidence attack without gaining score
+- [`runs/2026-06-01-strategy-002/`](examples/runs/2026-06-01-strategy-002/) — a strategy run (0.72, `keep`) that compounds on run 001 and kills its strongest-sounding hypothesis with counter-evidence
+- [`runs/2026-06-03-competitive-intel-003/`](examples/runs/2026-06-03-competitive-intel-003/) — a **discard** (0.38): real searching, weak sources, obvious thesis — archived cheaply instead of dressed up. This is the calibration anchor for conservative scoring
+- [`learning/`](examples/learning/) — self-learning snippets: a bets ledger with a resolved bet and hit rate, and a **write-back meta-review** that mutates weights, claims, and playbooks instead of just commenting
 - [`dashboard.html`](examples/dashboard.html) — Notion-style runs viewer with sidebar search/sort/filter and tabbed artifacts (hypotheses, notes, memo, bets, verdict, draft, scores)
 - [`reusable-rockets-thesis.html`](examples/reusable-rockets-thesis.html) — single-memo essay-style viewer
 

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/sdrth/sia-autoresearch/main/start/schemas/score.schema.json",
+  "title": "sia-autoresearch run scores",
+  "description": "Contract for runs/<run-id>/score.json and manifest.json scores. All dimensions 0.00-1.00. Overall is an honest rollup, not a formula. Most runs should land below 0.80; see spec section 8 for the rubric, hard downgrade triggers, and calibration anchors in examples/runs/.",
+  "type": "object",
+  "required": ["novelty", "actionability", "strategicLeverage", "evidenceQuality", "overall"],
+  "properties": {
+    "novelty": { "$ref": "#/$defs/dimension" },
+    "actionability": { "$ref": "#/$defs/dimension" },
+    "strategicLeverage": { "$ref": "#/$defs/dimension" },
+    "evidenceQuality": { "$ref": "#/$defs/dimension" },
+    "clarity": {
+      "$ref": "#/$defs/dimension",
+      "description": "Optional — omit or repurpose if irrelevant for the kind; stay consistent within a repo"
+    },
+    "overall": { "$ref": "#/$defs/dimension" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "dimension": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
+  }
+}

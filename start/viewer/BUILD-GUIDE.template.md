@@ -66,7 +66,10 @@ Build the **smallest viewer** that helps the owner review runs and coordinate th
 ### Panel: {{Run detail — owner vocabulary}}
 - **Purpose:** Read one run's evidence, outputs, and verdict in one place.
 - **Data:** `{{lab}}/runs/[run-id]/` — see [Run folder files](#run-folder-files) below.
-- **Behaviors:** Tab or section per artifact; show proof-of-work counts from `manifest.json` or `verdict.md`.
+- **Behaviors:** Tab or section per artifact, including an **Adversarial** tab
+  (`adversarial.md` — how the thesis was attacked and what survived); show
+  proof-of-work counts from `manifest.json` or `verdict.md`, plus a header badge for
+  the adversarial outcome (`adversarial.thesisRevised`) and the `claimsDelta` summary.
 - **Empty state:** Prompt to pick a run from the list.
 - **Why it matters here:** {{which kinds/outputs matter most in this repo}}
 
@@ -88,6 +91,32 @@ Build the **smallest viewer** that helps the owner review runs and coordinate th
 - **Behaviors:** Render `event` types (`setup_completed`, `run_created`, `verdict_updated`, etc.) in chronological order.
 - **Empty state:** {{e.g. "No activity yet."}}
 - **Why it matters here:** {{whether audit trail matters for this repo}}
+
+### Optional panels — 1.2.0 learning surfaces
+
+Include these when the owner cares about how the lab compounds (recommend at least
+the bet hit-rate panel — it is the lab's track record). Each reads a file the agent
+already maintains; render the empty state if the file is absent.
+
+### Panel: {{Claims ledger — owner vocabulary}}
+- **Purpose:** Show what the lab currently believes and how confident it is.
+- **Data:** `{{lab}}/notes/claims.json` (schema: `start/schemas/claims.schema.json`).
+- **Behaviors:** Group by `status` (`active` / `revised` / `contradicted` / `expired`);
+  flag claims past `reviewBy` as stale; link `sourceRun` and `evidence` (`src-NNN`).
+- **Empty state:** {{e.g. "No claims yet — runs add them as the lab forms beliefs."}}
+
+### Panel: {{Bet hit-rate — owner vocabulary}}
+- **Purpose:** Track whether past bets actually came true — the lab's judgment, measured.
+- **Data:** `{{lab}}/notes/bets-ledger.md` + `bet_resolved` events in `autoresearch.jsonl`.
+- **Behaviors:** Open bets with check-by dates; resolved right/wrong/unresolved; running hit rate.
+- **Empty state:** {{e.g. "No bets logged yet."}}
+
+### Panel: {{Source registry — owner vocabulary}}
+- **Purpose:** Browse the trusted sources steering research.
+- **Data:** `{{lab}}/config/sources/sources.json` (schema: `start/schemas/sources.schema.json`).
+- **Behaviors:** Sources by `qualityTier`, topic, `addedBy` (`owner` / `agent`), and weight.
+  Read-only here; edits go through the action surface as requests, never direct writes.
+- **Empty state:** {{e.g. "Registry empty — seed it at setup or add sources by hand."}}
 
 {{Add 0–2 repo-specific panels from SPEC.md using the same bullet structure.}}
 
@@ -121,7 +150,12 @@ All paths below use `{{lab}}/` as the lab root (`{{lab-path-description — e.g.
 | File | Shape | Used for |
 |------|-------|----------|
 | `{{lab}}/runs/autoresearch.jsonl` | one JSON object per line, append-only | run list, activity log, latest scores |
-| `{{lab}}/notes/autoresearch.md` | markdown sections | living memory, recent runs snapshot |
+| `{{lab}}/notes/autoresearch.md` | markdown sections | living memory, recent runs snapshot, local calibration anchors |
+| `{{lab}}/notes/claims.json` | `{ claims: [...] }` (schema: `start/schemas/claims.schema.json`) | claims-ledger panel; what the lab believes |
+| `{{lab}}/notes/bets-ledger.md` | markdown table + hit rate | bet hit-rate panel; resolved/open bets |
+| `{{lab}}/notes/hypothesis-index.md` | markdown table | optional: show discarded theses + revisit triggers |
+| `{{lab}}/notes/playbooks/<kind>.md` | markdown | optional: per-kind tactics that worked |
+| `{{lab}}/config/sources/sources.json` | `{ sources: [...] }` (schema: `start/schemas/sources.schema.json`) | source-registry panel |
 | `{{lab}}/config/setup.md` | markdown + frontmatter | enabled kinds, viewer mode, git prefs (read-only in viewer) |
 
 ### `autoresearch.jsonl` events
@@ -133,8 +167,12 @@ Each line is JSON. Common `event` values:
 | `setup_completed` | `timestamp` | activity log start |
 | `run_created` | `runId`, `kind`, `title`, `topic`, `verdict`, `overallScore`, `queries`, hypothesis counts | new run row |
 | `verdict_updated` | `runId`, `verdict`, optional `overallScore` | update row + activity log |
+| `owner_feedback` | `runId`, `reaction` (`acted_on`/`ignored`/`disagreed`/`revisit`), `note` | mark runs reacted-to; activity log |
+| `bet_resolved` | `runId`, `bet`, `resolution` (`right`/`wrong`/`unresolved`), `note` | bet hit-rate panel; activity log |
+| `meta_review` | `runsCovered`, `filesChanged`, `betHitRate` | activity log; calibration context |
 
-Parse line-by-line; tolerate partial files during an in-progress run.
+Parse line-by-line; tolerate partial files during an in-progress run. Treat unknown
+`event` values as forward-compatible — render them generically, do not crash.
 
 ### Run folder files
 
@@ -142,15 +180,19 @@ Per run: `{{lab}}/runs/[run-id]/`
 
 | File | Shape | Notes |
 |------|-------|-------|
-| `manifest.json` | `{ id, kind, title, topic, verdict, hypothesisCounts, selectedQueries, selectedSources, scores, outputs, createdAt, updatedAt }` | **Primary metadata** for list + detail headers |
+| `manifest.json` | `{ id, kind, title, topic, verdict, hypothesisCounts, selectedQueries, selectedSources, scores, adversarial, claimsDelta, outputs, specVersion, createdAt, updatedAt }` | **Primary metadata** for list + detail headers. `adversarial` / `claimsDelta` present on spec ≥ 1.2.0 runs; treat as optional |
 | `verdict.md` | markdown; `**Status:**` line + `## Proof of work` + `## Why this is not higher` | Parse status from markdown, not YAML frontmatter |
 | `score.json` | numeric dimensions 0.00–1.00 + `overall` | optional if `manifest.scores` already loaded |
 | `hypotheses.md` | markdown | proof of work — candidates, discarded branches, winning thesis |
-| `notes.md` | markdown | sources and raw observations |
+| `notes.md` | markdown | sources (with `src-NNN` registry ids) and raw observations |
 | `memo.md` | markdown | internal strategy memo |
+| `adversarial.md` | markdown | required on spec ≥ 1.2.0 runs — thesis attacked, counter-queries, what survived/revised; render as its own detail tab |
 | `bets.md` | markdown | recommendations (product-bets, growth, etc.) |
 | `essay.md` | markdown | optional public draft — omit tab if missing |
 | `voice-observations.md` | markdown | founder-writing runs only |
+
+**`manifest.adversarial` shape:** `{ performed: bool, counterQueries: string[], thesisRevised: bool, summary: string }`.
+**`manifest.claimsDelta` shape:** `{ added, confirmed, revised, contradicted }` (integers).
 
 **Verdict values:** `discard` | `draft` | `keep` | `send_for_review`
 
@@ -169,6 +211,11 @@ Per run: `{{lab}}/runs/[run-id]/`
 - **JSONL:** read whole file or tail for dev; sort by `timestamp` when building activity log.
 - **manifest.json:** prefer over re-parsing markdown for list views (faster, stable).
 - **verdict.md:** extract `**Status:**` value; render remaining sections as markdown.
+- **Spec version:** branch on `manifest.specVersion` — runs below 1.2.0 lack
+  `adversarial` / `claimsDelta` and have no `adversarial.md`; hide those surfaces for
+  older runs instead of showing empty ones.
+- **claims.json / sources.json:** plain JSON — validate against the shipped schemas;
+  on parse failure render the empty state, never crash.
 - **Missing files:** hide tabs/sections; never show broken embeds.
 - **In-progress runs:** manifest may exist before verdict — show partial state with a "in progress" badge if `verdict` is `draft`.
 
@@ -207,12 +254,13 @@ Inspect this repo before adding dependencies.
 Ship incrementally; verify each step before continuing.
 
 1. **Scaffold + read-only run list.** Parse `autoresearch.jsonl` + `manifest.json`. Confirm empty state.
-2. **Run detail.** One run page with tabs for artifacts that exist for enabled kinds: {{e.g. hypotheses, memo, bets, verdict}}.
+2. **Run detail.** One run page with tabs for artifacts that exist for enabled kinds: {{e.g. hypotheses, adversarial, memo, bets, verdict}}.
 3. **Agent picks panel.** Apply filter rule; link to detail.
 4. **Living memory.** Render tail of `notes/autoresearch.md`.
-5. **Activity log.** Chronological events from JSONL.
-6. **Actions (one at a time).** Record request → run one agent loop → confirm pickup → next action.
-7. **Stop.** No search, auth, sync, or cloud deploy until the owner has used the viewer for a week.
+5. **Activity log.** Chronological events from JSONL (include `owner_feedback`, `bet_resolved`, `meta_review`).
+6. **Learning panels (1.2.0).** Bet hit-rate first (`bets-ledger.md`), then claims ledger (`claims.json`), then source registry (`sources.json`). Each reads one file; skip if absent.
+7. **Actions (one at a time).** Record request → run one agent loop → confirm pickup → next action.
+8. **Stop.** No search, auth, sync, or cloud deploy until the owner has used the viewer for a week.
 
 {{If Q10b = `both`: optional step 0 — diff against `dashboard/index.html`; reuse its panel names where possible.}}
 
@@ -225,9 +273,10 @@ Run these checks before calling the viewer done:
 - [ ] **Cold start:** viewer opens with zero runs — all panels show empty states, no console errors.
 - [ ] **After loop 001:** {{enabled kind}} run appears in list within {{realistic time, e.g. "one refresh"}} with correct score and verdict.
 - [ ] **Agent picks:** a run with overall ≥ 0.80 or `send_for_review` appears in picks; sub-threshold `discard` does not (unless spec says otherwise).
-- [ ] **Run detail:** `hypotheses.md` proof-of-work section visible; missing `essay.md` does not break layout.
+- [ ] **Run detail:** `hypotheses.md` proof-of-work section visible; `adversarial.md` tab shown for 1.2.0 runs and hidden for older ones; missing `essay.md` does not break layout.
 - [ ] **Living memory:** `## Recent Runs` matches latest `autoresearch.jsonl` entry.
-- [ ] **Activity log:** shows `setup_completed` and at least one `run_created`.
+- [ ] **Learning panels (if built):** bet hit-rate reflects `bets-ledger.md`; claims ledger groups by status and flags stale claims; source registry lists `sources.json` entries — each shows its empty state when the file is absent.
+- [ ] **Activity log:** shows `setup_completed` and at least one `run_created`; `owner_feedback` / `bet_resolved` / `meta_review` events render (generically if unrecognized).
 - [ ] **Actions:** {{action 1}} request recorded in {{channel}} and picked up by agent on next loop.
 - [ ] **Local-only:** no network calls required to render runs (external source links in notes may open on click).
 
@@ -248,8 +297,8 @@ From `SPEC.md` — confirm these owner outcomes:
 - Component code, JSX, CSS, or design tokens — implementer chooses.
 - A bespoke API server for run data — re-read [File contracts](#file-contracts).
 - Auth, multi-user sync, or deployment — local-only by default.
-- Writing run artifacts from the viewer — only action **requests** in the approved channel.
-- New JSON schemas — consume what the agent loop already writes.
+- Writing run artifacts, `notes/`, or `config/sources/sources.json` from the viewer — only action **requests** in the approved channel; the agent applies them.
+- New JSON schemas — consume what the agent loop already writes (`manifest`, `score`, `claims`, `sources`).
 
 ---
 

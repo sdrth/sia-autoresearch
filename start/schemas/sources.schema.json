@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/sdrth/sia-autoresearch/main/start/schemas/sources.schema.json",
+  "title": "sia-autoresearch source registry",
+  "description": "Contract for config/sources/sources.json — the lab's living trusted-source list. Owner-editable at any time; agents search tier-1/2 entries before the open web (spec section 9 step 4) and append genuinely strong new sources every run. Weights update only by the explicit rule in spec section 10A. Agents self-validate by reading this file — no tooling required.",
+  "type": "object",
+  "required": ["sources"],
+  "properties": {
+    "objective": {
+      "type": "string",
+      "description": "One line on what this registry optimizes for"
+    },
+    "sources": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/source" }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "source": {
+      "type": "object",
+      "required": ["id", "name", "url", "type", "qualityTier", "addedBy", "dateAdded"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable source id: src-NNN — cited in notes.md and claims evidence",
+          "pattern": "^src-\\d{3,}$"
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "minLength": 1 },
+        "type": {
+          "type": "string",
+          "enum": ["primary", "data", "paper", "docs", "news", "community", "blog"]
+        },
+        "qualityTier": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3,
+          "description": "1 = primary/authoritative, 2 = strong secondary, 3 = background; tier-1/2 get searched first"
+        },
+        "topics": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Topics this source is good for — used to match registry entries to run topics"
+        },
+        "weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1.5,
+          "description": "Usefulness score, starts at 1.0; updated only by the spec section 10A rule (keep +0.05, discard -0.05, acted_on +0.10, ignored-keep -0.05; retire below 0.70, cap 1.50)"
+        },
+        "addedBy": {
+          "type": "string",
+          "enum": ["owner", "agent"],
+          "description": "Owner entries are never deleted or down-tiered by agents; agent entries must carry provenance in notes"
+        },
+        "dateAdded": { "type": "string", "format": "date" },
+        "lastUsed": {
+          "type": ["string", "null"],
+          "format": "date"
+        },
+        "timesUseful": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many kept runs cited this source"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Why this source earned a slot; for agent-added entries: which run found it"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

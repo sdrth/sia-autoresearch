@@ -30,10 +30,27 @@
     "clarity": 0.78,
     "overall": 0.76
   },
+  "adversarial": {
+    "performed": true,
+    "counterQueries": [
+      "onboarding improvements no effect trial conversion B2B",
+      "activation metric overrated SaaS criticism",
+      "wrong ICP trial signups conversion problem"
+    ],
+    "thesisRevised": false,
+    "summary": "Survivorship-bias and ICP-mismatch attacks; thesis survived with an ICP caveat folded into Bet 3"
+  },
+  "claimsDelta": {
+    "added": 1,
+    "confirmed": 0,
+    "revised": 0,
+    "contradicted": 0
+  },
   "publishingFile": null,
   "outputs": {
     "reversePressRelease": false
   },
+  "specVersion": "1.2.0",
   "createdAt": "2026-05-30T09:15:00Z",
   "updatedAt": "2026-05-30T10:42:00Z"
 }
