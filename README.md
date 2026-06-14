@@ -1,7 +1,9 @@
 # sia-autoresearch
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sdrth/sia-autoresearch)
+
 Source: [github.com/sdrth/sia-autoresearch](https://github.com/sdrth/sia-autoresearch)
 
 ## Quickstart
